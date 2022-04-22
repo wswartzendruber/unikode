@@ -18,13 +18,79 @@ import org.unikode.Utf8Encoder
 class Utf8EncoderTests {
 
     @Test
-    fun encode_string() {
+    fun encode_string_single_chunk() {
 
         val testByteArray = ByteArray(encodedByteArray.size)
         val encoder = Utf8Encoder()
         val byteCount = encoder.encode(TEXT, testByteArray)
 
         assertEquals(encodedByteArray.size, byteCount)
+        assertTrue(encodedByteArray contentEquals testByteArray)
+    }
+
+    @Test
+    fun encode_string_half_chunks() {
+
+        val testByteArray = ByteArray(encodedByteArray.size)
+        val encoder = Utf8Encoder()
+        var byteIndex = 0
+
+        byteIndex += encoder.encode(TEXT, testByteArray, 0, 37)
+        byteIndex += encoder.encode(TEXT, testByteArray, 37, TEXT.length, byteIndex)
+
+        assertEquals(encodedByteArray.size, byteIndex)
+        assertTrue(encodedByteArray contentEquals testByteArray)
+    }
+
+    @Test
+    fun encode_string_quarter_chunks() {
+
+        val testByteArray = ByteArray(encodedByteArray.size)
+        val encoder = Utf8Encoder()
+        var byteIndex = 0
+
+        byteIndex += encoder.encode(TEXT, testByteArray, 0, 18)
+        byteIndex += encoder.encode(TEXT, testByteArray, 18, 36, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 36, 54, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 54, TEXT.length, byteIndex)
+
+        assertEquals(encodedByteArray.size, byteIndex)
+        assertTrue(encodedByteArray contentEquals testByteArray)
+    }
+
+    @Test
+    fun encode_string_eighth_chunks() {
+
+        val testByteArray = ByteArray(encodedByteArray.size)
+        val encoder = Utf8Encoder()
+        var byteIndex = 0
+
+        byteIndex += encoder.encode(TEXT, testByteArray, 0, 9)
+        byteIndex += encoder.encode(TEXT, testByteArray, 9, 18, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 18, 27, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 27, 36, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 36, 45, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 45, 54, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 54, 63, byteIndex)
+        byteIndex += encoder.encode(TEXT, testByteArray, 63, TEXT.length, byteIndex)
+
+        assertEquals(encodedByteArray.size, byteIndex)
+        assertTrue(encodedByteArray contentEquals testByteArray)
+    }
+
+    @Test
+    fun encode_string_single_chars() {
+
+        val testByteArray = ByteArray(encodedByteArray.size)
+        val encoder = Utf8Encoder()
+        var byteIndex = 0
+
+        for (charIndex in 0 until TEXT.length) {
+            byteIndex +=
+                encoder.encode(TEXT, testByteArray, charIndex, charIndex + 1, byteIndex)
+        }
+
+        assertEquals(encodedByteArray.size, byteIndex)
         assertTrue(encodedByteArray contentEquals testByteArray)
     }
 
