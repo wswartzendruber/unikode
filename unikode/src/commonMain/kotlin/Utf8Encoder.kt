@@ -114,36 +114,34 @@ public class Utf8Encoder : Encoder() {
             destination: ByteArray,
             index: Int,
             codePoint: Int,
-        ): Int {
-            return when {
-                codePoint in 0x00..0x7F -> {
-                    destination[index] = codePoint.toByte()
-                    1
-                }
-                codePoint in 0x080..0x7FF -> {
-                    destination[index] = (0xC0 or (codePoint ushr 6)).toByte()
-                    destination[index + 1] = (0x80 or (codePoint and 0x3F)).toByte()
-                    2
-                }
-                codePoint in 0x0800..0xFFFF -> {
-                    destination[index] = (0xE0 or (codePoint ushr 12)).toByte()
-                    destination[index + 1] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
-                    destination[index + 2] = (0x80 or (codePoint and 0x3F)).toByte()
-                    3
-                }
-                codePoint in 0x010000..0x10FFFF -> {
-                    destination[index] = (0xF0 or (codePoint ushr 18)).toByte()
-                    destination[index + 1] = (0x80 or (codePoint ushr 12 and 0x3F)).toByte()
-                    destination[index + 2] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
-                    destination[index + 3] = (0x80 or (codePoint and 0x3F)).toByte()
-                    4
-                }
-                else -> {
-                    destination[index] = -17
-                    destination[index + 1] = -65
-                    destination[index + 2] = -67
-                    3
-                }
+        ) = when {
+            codePoint in 0x00..0x7F -> {
+                destination[index] = codePoint.toByte()
+                1
+            }
+            codePoint in 0x080..0x7FF -> {
+                destination[index] = (0xC0 or (codePoint ushr 6)).toByte()
+                destination[index + 1] = (0x80 or (codePoint and 0x3F)).toByte()
+                2
+            }
+            codePoint in 0x0800..0xFFFF -> {
+                destination[index] = (0xE0 or (codePoint ushr 12)).toByte()
+                destination[index + 1] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
+                destination[index + 2] = (0x80 or (codePoint and 0x3F)).toByte()
+                3
+            }
+            codePoint in 0x010000..0x10FFFF -> {
+                destination[index] = (0xF0 or (codePoint ushr 18)).toByte()
+                destination[index + 1] = (0x80 or (codePoint ushr 12 and 0x3F)).toByte()
+                destination[index + 2] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
+                destination[index + 3] = (0x80 or (codePoint and 0x3F)).toByte()
+                4
+            }
+            else -> {
+                destination[index] = -17
+                destination[index + 1] = -65
+                destination[index + 2] = -67
+                3
             }
         }
     }
