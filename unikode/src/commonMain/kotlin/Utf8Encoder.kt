@@ -89,6 +89,9 @@ public class Utf8Encoder : Encoder() {
                         )
                     }
                 }
+                else -> {
+                    throw IllegalStateException("Internal state is irrational.")
+                }
             }
 
             charsEncoded++
