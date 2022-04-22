@@ -17,4 +17,6 @@
 package org.unikode
 
 public fun codePoint(highSurrogate: Char, lowSurrogate: Char): Int =
-    (highSurrogate.code and 0b1111111111 shl 6) or (lowSurrogate.code and 0b1111111111)
+    (highSurrogate.code and 0b1111111111 shl 10) or
+    (lowSurrogate.code and 0b1111111111) +
+    0x10000

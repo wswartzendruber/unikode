@@ -21,11 +21,11 @@ public class Utf8Encoder : Encoder() {
     private var instanceHighSurrogate: Char? = null
 
     public override fun encode(
-        destination: ByteArray,
-        destinationOffset: Int,
         source: CharSequence,
+        destination: ByteArray,
         sourceStartIndex: Int,
         sourceEndIndex: Int,
+        destinationOffset: Int,
     ): Int {
 
         var destinationIndex = destinationOffset
@@ -97,7 +97,7 @@ public class Utf8Encoder : Encoder() {
             charsEncoded++
         }
 
-        return charsEncoded
+        return destinationIndex - destinationOffset
     }
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
@@ -114,27 +114,27 @@ public class Utf8Encoder : Encoder() {
             destination: ByteArray,
             index: Int,
             codePoint: Int,
-        ): Int =
-            when {
+        ): Int {
+            return when {
                 codePoint in 0x00..0x7F -> {
                     destination[index] = codePoint.toByte()
                     1
                 }
                 codePoint in 0x080..0x7FF -> {
-                    destination[index] = (0xC0 or (codePoint shl 6)).toByte()
+                    destination[index] = (0xC0 or (codePoint ushr 6)).toByte()
                     destination[index + 1] = (0x80 or (codePoint and 0x3F)).toByte()
                     2
                 }
                 codePoint in 0x0800..0xFFFF -> {
-                    destination[index] = (0xE0 or (codePoint shl 12)).toByte()
-                    destination[index + 1] = (0x80 or (codePoint shr 6 and 0x3F)).toByte()
+                    destination[index] = (0xE0 or (codePoint ushr 12)).toByte()
+                    destination[index + 1] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
                     destination[index + 2] = (0x80 or (codePoint and 0x3F)).toByte()
                     3
                 }
                 codePoint in 0x010000..0x10FFFF -> {
-                    destination[index] = (0xF0 or (codePoint shl 18)).toByte()
-                    destination[index + 1] = (0x80 or (codePoint shr 12 and 0x3F)).toByte()
-                    destination[index + 2] = (0x80 or (codePoint shr 6 and 0x3F)).toByte()
+                    destination[index] = (0xF0 or (codePoint ushr 18)).toByte()
+                    destination[index + 1] = (0x80 or (codePoint ushr 12 and 0x3F)).toByte()
+                    destination[index + 2] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
                     destination[index + 3] = (0x80 or (codePoint and 0x3F)).toByte()
                     4
                 }
@@ -145,5 +145,6 @@ public class Utf8Encoder : Encoder() {
                     3
                 }
             }
+        }
     }
 }

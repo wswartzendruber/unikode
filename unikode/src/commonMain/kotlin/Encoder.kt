@@ -19,11 +19,11 @@ package org.unikode
 public abstract class Encoder {
 
     public abstract fun encode(
-        destination: ByteArray,
-        destinationOffset: Int = 0,
         source: CharSequence,
+        destination: ByteArray,
         sourceStartIndex: Int = 0,
         sourceEndIndex: Int = source.length,
+        destinationOffset: Int = 0,
     ): Int
 
     public abstract fun maxBytesNeeded(charCount: Int): Int
