@@ -100,7 +100,7 @@ public class Utf8Encoder : Encoder() {
         return destinationIndex - destinationOffset
     }
 
-    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
     public override fun reset(): Unit {
         instanceHighSurrogate = null
