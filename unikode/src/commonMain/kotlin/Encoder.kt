@@ -18,11 +18,39 @@ package org.unikode
 
 public abstract class Encoder {
 
-    public abstract fun encode(
+    public fun encode(
         source: CharSequence,
         destination: ByteArray,
         sourceStartIndex: Int = 0,
         sourceEndIndex: Int = source.length,
+        destinationOffset: Int = 0,
+    ): Int {
+
+        require(sourceStartIndex <= sourceEndIndex) {
+            "sourceStartIndex must be equal to or less than sourceEndIndex."
+        }
+
+        val charsToEncode = sourceEndIndex - sourceStartIndex
+
+        require(sourceEndIndex <= source.length) {
+            "sourceEndIndex exceeds the number of characters in the source."
+        }
+
+        val iterator = source.iterator()
+
+        repeat(sourceStartIndex) {
+            iterator.next()
+        }
+
+        val bytesEncoded = encode(iterator, charsToEncode, destination, destinationOffset)
+
+        return bytesEncoded
+    }
+
+    public abstract fun encode(
+        source: CharIterator,
+        sourceCount: Int,
+        destination: ByteArray,
         destinationOffset: Int = 0,
     ): Int
 

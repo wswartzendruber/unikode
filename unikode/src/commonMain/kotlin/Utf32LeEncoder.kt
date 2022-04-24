@@ -21,36 +21,18 @@ public class Utf32LeEncoder : Encoder() {
     private var instanceHighSurrogate: Char? = null
 
     public override fun encode(
-        source: CharSequence,
+        source: CharIterator,
+        sourceCount: Int,
         destination: ByteArray,
-        sourceStartIndex: Int,
-        sourceEndIndex: Int,
         destinationOffset: Int,
     ): Int {
 
         var destinationIndex = destinationOffset
 
-        require(sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be equal to or less than sourceEndIndex."
-        }
-
-        val charsToEncode = sourceEndIndex - sourceStartIndex
-
-        require(charsToEncode <= source.length) {
-            "The number of characters to encode exceeds the number of characters in the source."
-        }
-
-        val iterator = source.iterator()
-        var charsEncoded = 0
-
-        repeat(sourceStartIndex) {
-            iterator.next()
-        }
-
-        while (charsEncoded < charsToEncode) {
+        repeat(sourceCount) {
 
             val highSurrogate = instanceHighSurrogate
-            val currentChar = iterator.next()
+            val currentChar = source.next()
 
             when {
                 !currentChar.isSurrogate() -> {
@@ -98,8 +80,6 @@ public class Utf32LeEncoder : Encoder() {
                     throw IllegalStateException("Internal state is irrational.")
                 }
             }
-
-            charsEncoded++
         }
 
         return destinationIndex - destinationOffset
