@@ -49,10 +49,10 @@ class Utf32BeDecoderTests {
         val decoder = Utf32BeDecoder()
         var charIndex = 0
 
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 0, 68)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 68, 136, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 136, 204, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 204, 280, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 0, 70)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 70, 140, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 140, 210, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 210, 280, charIndex)
 
         assertEquals(TEXT.length, charIndex)
         assertTrue(TEXT.toCharArray() contentEquals testCharArray)
@@ -65,14 +65,14 @@ class Utf32BeDecoderTests {
         val decoder = Utf32BeDecoder()
         var charIndex = 0
 
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 0, 32)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 32, 64, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 64, 96, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 96, 128, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 128, 160, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 160, 192, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 192, 224, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 224, 280, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 0, 35)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 35, 70, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 70, 105, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 105, 140, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 140, 175, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 175, 210, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 210, 245, charIndex)
+        charIndex += decoder.decode(textByteArrayUtf32Be, testCharArray, 245, 280, charIndex)
 
         assertEquals(TEXT.length, charIndex)
         assertTrue(TEXT.toCharArray() contentEquals testCharArray)

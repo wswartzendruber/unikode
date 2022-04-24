@@ -18,6 +18,8 @@ package org.unikode
 
 public class Utf16BeDecoder : Decoder() {
 
+    private var continuing = false
+    private var currentByte: Byte = 0x00
     private var instanceHighSurrogate: Char? = null
 
     public override fun decode(
@@ -40,10 +42,6 @@ public class Utf16BeDecoder : Decoder() {
             "The number of bytes to decode exceeds the number of bytes in the source."
         }
 
-        require(bytesToDecode % 2 == 0) {
-            "The number of UTF-16 bytes to decode must be evenly divisible by two."
-        }
-
         val iterator = source.iterator()
         var bytesDecoded = 0
 
@@ -53,42 +51,47 @@ public class Utf16BeDecoder : Decoder() {
 
         while (bytesDecoded < bytesToDecode) {
 
-            val highSurrogate = instanceHighSurrogate
-            val currentChar =
-                (
-                    (iterator.next().toInt() and 0xFF shl 8) or
-                    (iterator.next().toInt() and 0xFF)
-                )
-                .toChar()
-
-            when {
-                !currentChar.isSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destination[destinationIndex++] = REPLACEMENT_CHAR
-                        instanceHighSurrogate = null
-                    }
-                    destination[destinationIndex++] = currentChar
-                }
-                currentChar.isHighSurrogate() -> {
-                    if (highSurrogate != null)
-                        destination[destinationIndex++] = REPLACEMENT_CHAR
-                    instanceHighSurrogate = currentChar
-                }
-                currentChar.isLowSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destination[destinationIndex++] = highSurrogate
+            if (!continuing) {
+                currentByte = iterator.next()
+                continuing = true
+            } else {
+                val highSurrogate = instanceHighSurrogate
+                val currentChar =
+                    (
+                        (currentByte.toInt() and 0xFF shl 8) or
+                        (iterator.next().toInt() and 0xFF)
+                    )
+                    .toChar()
+                when {
+                    !currentChar.isSurrogate() -> {
+                        if (highSurrogate != null) {
+                            destination[destinationIndex++] = REPLACEMENT_CHAR
+                            instanceHighSurrogate = null
+                        }
                         destination[destinationIndex++] = currentChar
-                        instanceHighSurrogate = null
-                    } else {
-                        destination[destinationIndex++] = REPLACEMENT_CHAR
+                    }
+                    currentChar.isHighSurrogate() -> {
+                        if (highSurrogate != null)
+                            destination[destinationIndex++] = REPLACEMENT_CHAR
+                        instanceHighSurrogate = currentChar
+                    }
+                    currentChar.isLowSurrogate() -> {
+                        if (highSurrogate != null) {
+                            destination[destinationIndex++] = highSurrogate
+                            destination[destinationIndex++] = currentChar
+                            instanceHighSurrogate = null
+                        } else {
+                            destination[destinationIndex++] = REPLACEMENT_CHAR
+                        }
+                    }
+                    else -> {
+                        throw IllegalStateException("Internal state is irrational.")
                     }
                 }
-                else -> {
-                    throw IllegalStateException("Internal state is irrational.")
-                }
+                continuing = false
             }
 
-            bytesDecoded += 2
+            bytesDecoded++
         }
 
         return destinationIndex - destinationOffset
@@ -97,6 +100,8 @@ public class Utf16BeDecoder : Decoder() {
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
     public override fun reset(): Unit {
+        continuing = false
+        currentByte = 0x00
         instanceHighSurrogate = null
     }
 

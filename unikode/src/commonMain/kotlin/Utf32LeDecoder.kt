@@ -18,6 +18,9 @@ package org.unikode
 
 public class Utf32LeDecoder : Decoder() {
 
+    private val currentBytes = ByteArray(3)
+    private var currentByteCount = 0
+
     public override fun decode(
         source: ByteArray,
         destination: CharArray,
@@ -38,10 +41,6 @@ public class Utf32LeDecoder : Decoder() {
             "The number of bytes to decode exceeds the number of bytes in the source."
         }
 
-        require(bytesToDecode % 4 == 0) {
-            "The number of UTF-32 bytes to decode must be evenly divisible by four."
-        }
-
         val iterator = source.iterator()
         var bytesDecoded = 0
 
@@ -51,28 +50,32 @@ public class Utf32LeDecoder : Decoder() {
 
         while (bytesDecoded < bytesToDecode) {
 
-            val currentValue =
-                (
-                    (iterator.next().toInt() and 0xFF) or
-                    (iterator.next().toInt() and 0xFF shl 8) or
-                    (iterator.next().toInt() and 0xFF shl 16) or
-                    (iterator.next().toInt() and 0xFF shl 24)
-                )
-
-            when (currentValue) {
-                in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
-                    destination[destinationIndex++] = currentValue.toChar()
+            if (currentByteCount < 3) {
+                currentBytes[currentByteCount++] = iterator.next()
+            } else {
+                val currentValue =
+                    (
+                        (currentBytes[0].toInt() and 0xFF) or
+                        (currentBytes[1].toInt() and 0xFF shl 8) or
+                        (currentBytes[2].toInt() and 0xFF shl 16) or
+                        (iterator.next().toInt() and 0xFF shl 24)
+                    )
+                when (currentValue) {
+                    in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
+                        destination[destinationIndex++] = currentValue.toChar()
+                    }
+                    in 0x010000..0x10FFFF -> {
+                        destination[destinationIndex++] = currentValue.highSurrogate()
+                        destination[destinationIndex++] = currentValue.lowSurrogate()
+                    }
+                    else -> {
+                        destination[destinationIndex++] = REPLACEMENT_CHAR
+                    }
                 }
-                in 0x010000..0x10FFFF -> {
-                    destination[destinationIndex++] = currentValue.highSurrogate()
-                    destination[destinationIndex++] = currentValue.lowSurrogate()
-                }
-                else -> {
-                    destination[destinationIndex++] = REPLACEMENT_CHAR
-                }
+                currentByteCount = 0
             }
 
-            bytesDecoded += 4
+            bytesDecoded++
         }
 
         return destinationIndex - destinationOffset
@@ -80,7 +83,12 @@ public class Utf32LeDecoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    public override fun reset(): Unit { }
+    public override fun reset(): Unit {
+        currentBytes[0] = 0x00
+        currentBytes[1] = 0x00
+        currentBytes[2] = 0x00
+        currentByteCount = 0
+    }
 
     private companion object {
 
