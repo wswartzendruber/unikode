@@ -40,7 +40,7 @@ public class Utf8Decoder : Decoder() {
         val bytesToDecode = sourceEndIndex - sourceStartIndex
 
         require(bytesToDecode <= source.size) {
-            "The number of characters to encode exceeds the number of characters in the source."
+            "The number of bytes to decode exceeds the number of bytes in the source."
         }
 
         val iterator = source.iterator()
