@@ -79,7 +79,7 @@ class Utf32BeEncoderTests {
     }
 
     @Test
-    fun encode_string_single_chars() {
+    fun encode_string_single_step() {
 
         val testByteArray = ByteArray(textByteArrayUtf32Be.size)
         val encoder = Utf32BeEncoder()

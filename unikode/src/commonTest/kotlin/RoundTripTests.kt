@@ -16,11 +16,16 @@ import org.unikode.Encoder
 import org.unikode.Decoder
 import org.unikode.Utf8Encoder
 import org.unikode.Utf8Decoder
+import org.unikode.Utf16LeEncoder
+import org.unikode.Utf16LeDecoder
 
-class Utf8RoundTripTests {
+class RoundTripTests {
 
     @Test
     fun utf8() = cycle(Utf8Encoder(), Utf8Decoder())
+
+    @Test
+    fun utf16le() = cycle(Utf16LeEncoder(), Utf16LeDecoder())
 
     fun cycle(encoder: Encoder, decoder: Decoder) {
 

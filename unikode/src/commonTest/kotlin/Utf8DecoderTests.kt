@@ -79,7 +79,7 @@ class Utf8DecoderTests {
     }
 
     @Test
-    fun decode_bytes_single_chars() {
+    fun decode_bytes_single_step() {
 
         val testCharArray = CharArray(TEXT.length)
         val decoder = Utf8Decoder()

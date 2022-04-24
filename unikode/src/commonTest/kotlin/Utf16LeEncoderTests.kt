@@ -79,7 +79,7 @@ class Utf16LeEncoderTests {
     }
 
     @Test
-    fun encode_string_single_chars() {
+    fun encode_string_single_step() {
 
         val testByteArray = ByteArray(textByteArrayUtf16Le.size)
         val encoder = Utf16LeEncoder()
