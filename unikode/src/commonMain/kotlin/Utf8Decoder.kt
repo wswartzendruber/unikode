@@ -126,7 +126,7 @@ public class Utf8Decoder : Decoder() {
         return destinationIndex - destinationOffset
     }
 
-    public override fun maxCharsNeeded(byteCount: Int): Int = 0
+    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
     public override fun reset(): Unit {
         continuing = false
