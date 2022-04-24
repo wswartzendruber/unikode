@@ -55,8 +55,11 @@ public class Utf16BeDecoder : Decoder() {
 
             val highSurrogate = instanceHighSurrogate
             val currentChar =
-                ((iterator.next().toInt() and 0xFF shl 8) or
-                (iterator.next().toInt() and 0xFF)).toChar()
+                (
+                    (iterator.next().toInt() and 0xFF shl 8) or
+                    (iterator.next().toInt() and 0xFF)
+                )
+                .toChar()
 
             when {
                 !currentChar.isSurrogate() -> {

@@ -55,8 +55,11 @@ public class Utf16LeDecoder : Decoder() {
 
             val highSurrogate = instanceHighSurrogate
             val currentChar =
-                ((iterator.next().toInt() and 0xFF) or
-                (iterator.next().toInt() and 0xFF shl 8)).toChar()
+                (
+                    (iterator.next().toInt() and 0xFF) or
+                    (iterator.next().toInt() and 0xFF shl 8)
+                )
+                .toChar()
 
             when {
                 !currentChar.isSurrogate() -> {
