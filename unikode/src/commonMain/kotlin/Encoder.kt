@@ -36,25 +36,23 @@ public abstract class Encoder {
             "sourceEndIndex exceeds the number of characters in the source."
         }
 
-        val iterator = source.iterator()
-
-        repeat(sourceStartIndex) {
-            iterator.next()
-        }
-
+        val subSource = source.subSequence(sourceStartIndex, sourceEndIndex)
+        val iterator = subSource.iterator()
         val bytesEncoded = encode(iterator, charsToEncode, destination, destinationOffset)
 
         return bytesEncoded
     }
 
     public abstract fun encode(
-        source: CharIterator,
+        source: Iterator<Char>,
         sourceCount: Int,
         destination: ByteArray,
         destinationOffset: Int = 0,
     ): Int
 
     public abstract fun maxBytesNeeded(charCount: Int): Int
+
+    public abstract fun maxCharsPossible(byteCount: Int): Int
 
     public abstract fun reset(): Unit
 }

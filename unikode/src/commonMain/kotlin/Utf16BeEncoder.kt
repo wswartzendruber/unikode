@@ -21,7 +21,7 @@ public class Utf16BeEncoder : Encoder() {
     private var instanceHighSurrogate: Char? = null
 
     public override fun encode(
-        source: CharIterator,
+        source: Iterator<Char>,
         sourceCount: Int,
         destination: ByteArray,
         destinationOffset: Int,
@@ -90,7 +90,9 @@ public class Utf16BeEncoder : Encoder() {
         return destinationIndex - destinationOffset
     }
 
-    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 2
+
+    public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
 
     public override fun reset(): Unit {
         instanceHighSurrogate = null
