@@ -22,6 +22,8 @@ import org.unikode.Utf16BeEncoder
 import org.unikode.Utf16BeDecoder
 import org.unikode.Utf32LeEncoder
 import org.unikode.Utf32LeDecoder
+import org.unikode.Utf32BeEncoder
+import org.unikode.Utf32BeDecoder
 
 class RoundTripTests {
 
@@ -36,6 +38,9 @@ class RoundTripTests {
 
     @Test
     fun utf32le() = cycle(Utf32LeEncoder(), Utf32LeDecoder())
+
+    @Test
+    fun utf32be() = cycle(Utf32BeEncoder(), Utf32BeDecoder())
 
     fun cycle(encoder: Encoder, decoder: Decoder) {
 
