@@ -23,3 +23,6 @@ gradle-app.setting
 
 # Ignore Gradle build output directory
 build
+
+# GitHub seems to be complaining about this having vulnerabilities.
+/kotlin-js-store
