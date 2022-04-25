@@ -18,97 +18,32 @@ package org.unikode
 
 public class Utf16LeEncoder : Encoder() {
 
-    private var instanceHighSurrogate: Char? = null
-
-    public override fun encode(
-        source: Iterator<Char>,
-        sourceCount: Int,
-        destination: ByteArray,
-        destinationOffset: Int,
-    ): Int {
-
-        var destinationIndex = destinationOffset
-
-        repeat(sourceCount) {
-
-            val highSurrogate = instanceHighSurrogate
-            val currentChar = source.next()
-
-            when {
-                !currentChar.isSurrogate() -> {
-                    if (highSurrogate != null) {
-                        writeCharToByteArray(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR,
-                        )
-                        destinationIndex += 2
-                        instanceHighSurrogate = null
-                    }
-                    writeCharToByteArray(
-                        destination, destinationIndex,
-                        currentChar,
-                    )
-                    destinationIndex += 2
-                }
-                currentChar.isHighSurrogate() -> {
-                    if (highSurrogate != null) {
-                        writeCharToByteArray(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR,
-                        )
-                        destinationIndex += 2
-                    }
-                    instanceHighSurrogate = currentChar
-                }
-                currentChar.isLowSurrogate() -> {
-                    if (highSurrogate != null) {
-                        writeCharToByteArray(
-                            destination, destinationIndex,
-                            highSurrogate,
-                        )
-                        destinationIndex += 2
-                        writeCharToByteArray(
-                            destination, destinationIndex,
-                            currentChar,
-                        )
-                        destinationIndex += 2
-                        instanceHighSurrogate = null
-                    } else {
-                        writeCharToByteArray(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR,
-                        )
-                        destinationIndex += 2
-                    }
-                }
-                else -> {
-                    throw IllegalStateException("Internal state is irrational.")
-                }
-            }
-        }
-
-        return destinationIndex - destinationOffset
-    }
-
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 2
 
     public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
 
-    public override fun reset(): Unit {
-        instanceHighSurrogate = null
+    protected override fun writeNextCodePoint(
+        destination: ByteArray,
+        offset: Int,
+        value: Int,
+    ): Int = if (value <= 0xFFFF) {
+        destination[offset] = (value and 0xFF).toByte()
+        destination[offset + 1] = (value and 0xFF00 ushr 8).toByte()
+        2
+    } else {
+        val highSurrogate = value.highSurrogate()
+        val lowSurrogate = value.lowSurrogate()
+        destination[offset] = (highSurrogate and 0xFF).toByte()
+        destination[offset + 1] = (highSurrogate and 0xFF00 ushr 8).toByte()
+        destination[offset + 2] = (lowSurrogate and 0xFF).toByte()
+        destination[offset + 3] = (lowSurrogate and 0xFF00 ushr 8).toByte()
+        4
     }
 
     private companion object {
 
-        private const val REPLACEMENT_CHAR = '�'
+        private fun Int.highSurrogate() = ((this - 0x10000) ushr 10) + 0xD800
 
-        private fun writeCharToByteArray(
-            destination: ByteArray,
-            index: Int,
-            char: Char,
-        ) {
-            destination[index] = (char.code and 0xFF).toByte()
-            destination[index + 1] = (char.code and 0xFF00 ushr 8).toByte()
-        }
+        private fun Int.lowSurrogate() = ((this - 0x10000) and 0x3FF) + 0xDC00
     }
 }

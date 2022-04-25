@@ -18,6 +18,12 @@ package org.unikode
 
 public abstract class Encoder {
 
+    private var instanceHighSurrogate: Char? = null
+
+    public abstract fun maxBytesNeeded(charCount: Int): Int
+
+    public abstract fun maxCharsPossible(byteCount: Int): Int
+
     public fun encode(
         source: CharSequence,
         destination: ByteArray,
@@ -43,16 +49,81 @@ public abstract class Encoder {
         return bytesEncoded
     }
 
-    public abstract fun encode(
+    public fun encode(
         source: Iterator<Char>,
-        sourceCount: Int,
+        sourceLimit: Int,
         destination: ByteArray,
         destinationOffset: Int = 0,
+    ): Int {
+
+        var sourceCount = 0
+        var destinationIndex = destinationOffset
+
+        while (source.hasNext() && sourceCount < sourceLimit) {
+
+            val highSurrogate = instanceHighSurrogate
+            val currentChar = source.next()
+
+            when {
+                !currentChar.isSurrogate() -> {
+                    if (highSurrogate != null) {
+                        destinationIndex += writeNextCodePoint(
+                            destination, destinationIndex,
+                            REPLACEMENT_CHAR,
+                        )
+                        instanceHighSurrogate = null
+                    }
+                    destinationIndex += writeNextCodePoint(
+                        destination, destinationIndex,
+                        currentChar.code,
+                    )
+                }
+                currentChar.isHighSurrogate() -> {
+                    if (highSurrogate != null) {
+                        destinationIndex += writeNextCodePoint(
+                            destination, destinationIndex,
+                            REPLACEMENT_CHAR,
+                        )
+                    }
+                    instanceHighSurrogate = currentChar
+                }
+                currentChar.isLowSurrogate() -> {
+                    if (highSurrogate != null) {
+                        destinationIndex += writeNextCodePoint(
+                            destination, destinationIndex,
+                            codePoint(highSurrogate, currentChar),
+                        )
+                        instanceHighSurrogate = null
+                    } else {
+                        destinationIndex += writeNextCodePoint(
+                            destination, destinationIndex,
+                            REPLACEMENT_CHAR,
+                        )
+                    }
+                }
+                else -> {
+                    throw IllegalStateException("Internal state is irrational.")
+                }
+            }
+        }
+
+        return destinationIndex - destinationOffset
+    }
+
+    protected abstract fun writeNextCodePoint(
+        destination: ByteArray,
+        offset: Int,
+        value: Int,
     ): Int
 
-    public abstract fun maxBytesNeeded(charCount: Int): Int
+    public fun reset(): Unit {
+        resetState()
+    }
 
-    public abstract fun maxCharsPossible(byteCount: Int): Int
+    protected open fun resetState(): Unit { }
 
-    public abstract fun reset(): Unit
+    private companion object {
+
+        private const val REPLACEMENT_CHAR = 0xFFFD
+    }
 }

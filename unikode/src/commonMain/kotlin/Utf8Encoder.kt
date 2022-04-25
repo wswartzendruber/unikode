@@ -18,113 +18,39 @@ package org.unikode
 
 public class Utf8Encoder : Encoder() {
 
-    private var instanceHighSurrogate: Char? = null
-
-    public override fun encode(
-        source: Iterator<Char>,
-        sourceCount: Int,
-        destination: ByteArray,
-        destinationOffset: Int,
-    ): Int {
-
-        var destinationIndex = destinationOffset
-
-        repeat(sourceCount) {
-
-            val highSurrogate = instanceHighSurrogate
-            val currentChar = source.next()
-
-            when {
-                !currentChar.isSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destinationIndex += writeCodePointToByteArray(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR,
-                        )
-                        instanceHighSurrogate = null
-                    }
-                    destinationIndex += writeCodePointToByteArray(
-                        destination, destinationIndex,
-                        currentChar.code,
-                    )
-                }
-                currentChar.isHighSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destinationIndex += writeCodePointToByteArray(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR,
-                        )
-                    }
-                    instanceHighSurrogate = currentChar
-                }
-                currentChar.isLowSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destinationIndex += writeCodePointToByteArray(
-                            destination, destinationIndex,
-                            codePoint(highSurrogate, currentChar),
-                        )
-                        instanceHighSurrogate = null
-                    } else {
-                        destinationIndex += writeCodePointToByteArray(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR,
-                        )
-                    }
-                }
-                else -> {
-                    throw IllegalStateException("Internal state is irrational.")
-                }
-            }
-        }
-
-        return destinationIndex - destinationOffset
-    }
-
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
     public override fun maxCharsPossible(byteCount: Int): Int = byteCount
 
-    public override fun reset(): Unit {
-        instanceHighSurrogate = null
-    }
-
-    private companion object {
-
-        private const val REPLACEMENT_CHAR = 0xFFFD
-
-        private fun writeCodePointToByteArray(
-            destination: ByteArray,
-            index: Int,
-            codePoint: Int,
-        ) = when (codePoint) {
-            in 0x00..0x7F -> {
-                destination[index] = codePoint.toByte()
-                1
-            }
-            in 0x080..0x7FF -> {
-                destination[index] = (0xC0 or (codePoint ushr 6)).toByte()
-                destination[index + 1] = (0x80 or (codePoint and 0x3F)).toByte()
-                2
-            }
-            in 0x0800..0xFFFF -> {
-                destination[index] = (0xE0 or (codePoint ushr 12)).toByte()
-                destination[index + 1] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
-                destination[index + 2] = (0x80 or (codePoint and 0x3F)).toByte()
-                3
-            }
-            in 0x010000..0x10FFFF -> {
-                destination[index] = (0xF0 or (codePoint ushr 18)).toByte()
-                destination[index + 1] = (0x80 or (codePoint ushr 12 and 0x3F)).toByte()
-                destination[index + 2] = (0x80 or (codePoint ushr 6 and 0x3F)).toByte()
-                destination[index + 3] = (0x80 or (codePoint and 0x3F)).toByte()
-                4
-            }
-            else -> {
-                destination[index] = -17
-                destination[index + 1] = -65
-                destination[index + 2] = -67
-                3
-            }
+    protected override fun writeNextCodePoint(
+        destination: ByteArray,
+        offset: Int,
+        value: Int,
+    ): Int = when (value) {
+        in 0x00..0x7F -> {
+            destination[offset] = value.toByte()
+            1
+        }
+        in 0x080..0x7FF -> {
+            destination[offset] = (0xC0 or (value ushr 6)).toByte()
+            destination[offset + 1] = (0x80 or (value and 0x3F)).toByte()
+            2
+        }
+        in 0x0800..0xFFFF -> {
+            destination[offset] = (0xE0 or (value ushr 12)).toByte()
+            destination[offset + 1] = (0x80 or (value ushr 6 and 0x3F)).toByte()
+            destination[offset + 2] = (0x80 or (value and 0x3F)).toByte()
+            3
+        }
+        in 0x010000..0x10FFFF -> {
+            destination[offset] = (0xF0 or (value ushr 18)).toByte()
+            destination[offset + 1] = (0x80 or (value ushr 12 and 0x3F)).toByte()
+            destination[offset + 2] = (0x80 or (value ushr 6 and 0x3F)).toByte()
+            destination[offset + 3] = (0x80 or (value and 0x3F)).toByte()
+            4
+        }
+        else -> {
+            throw IllegalStateException("Got invalid value from superclass.")
         }
     }
 }
