@@ -21,6 +21,8 @@ public class Utf32LeDecoder : Decoder() {
     private val currentBytes = ByteArray(3)
     private var currentByteCount = 0
 
+    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
+
     public override fun decode(
         source: ByteArray,
         destination: CharArray,
@@ -80,8 +82,6 @@ public class Utf32LeDecoder : Decoder() {
 
         return destinationIndex - destinationOffset
     }
-
-    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
     public override fun reset(): Unit {
         currentBytes[0] = 0x00

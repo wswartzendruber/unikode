@@ -23,6 +23,8 @@ public class Utf8Decoder : Decoder() {
     private var currentBytesExpected = 0
     private var currentByteCount = 0
 
+    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
+
     public override fun decode(
         source: ByteArray,
         destination: CharArray,
@@ -125,8 +127,6 @@ public class Utf8Decoder : Decoder() {
 
         return destinationIndex - destinationOffset
     }
-
-    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
     public override fun reset(): Unit {
         continuing = false

@@ -22,6 +22,8 @@ public class Utf16BeDecoder : Decoder() {
     private var currentByte: Byte = 0x00
     private var instanceHighSurrogate: Char? = null
 
+    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
+
     public override fun decode(
         source: ByteArray,
         destination: CharArray,
@@ -96,8 +98,6 @@ public class Utf16BeDecoder : Decoder() {
 
         return destinationIndex - destinationOffset
     }
-
-    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
     public override fun reset(): Unit {
         continuing = false

@@ -18,6 +18,8 @@ package org.unikode
 
 public abstract class Decoder {
 
+    public abstract fun maxCharsNeeded(byteCount: Int): Int
+
     public abstract fun decode(
         source: ByteArray,
         destination: CharArray,
@@ -25,8 +27,6 @@ public abstract class Decoder {
         sourceEndIndex: Int = source.size,
         destinationOffset: Int = 0,
     ): Int
-
-    public abstract fun maxCharsNeeded(byteCount: Int): Int
 
     public abstract fun reset(): Unit
 }
