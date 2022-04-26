@@ -31,8 +31,8 @@ public class Utf32BeDecoder : Decoder() {
 
         var destinationIndex = destinationOffset
 
-        require(sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be equal to or less than sourceEndIndex."
+        require(sourceStartIndex => 0 && sourceStartIndex <= sourceEndIndex) {
+            "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
         }
 
         val bytesToDecode = sourceEndIndex - sourceStartIndex

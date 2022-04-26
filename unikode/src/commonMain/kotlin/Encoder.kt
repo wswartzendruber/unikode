@@ -32,8 +32,8 @@ public abstract class Encoder {
         destinationOffset: Int = 0,
     ): Int {
 
-        require(sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be equal to or less than sourceEndIndex."
+        require(sourceStartIndex >= 0 && sourceStartIndex <= sourceEndIndex) {
+            "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
         }
 
         val charsToEncode = sourceEndIndex - sourceStartIndex
