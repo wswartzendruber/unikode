@@ -20,13 +20,48 @@ public abstract class Decoder {
 
     public abstract fun maxCharsNeeded(byteCount: Int): Int
 
-    public abstract fun decode(
+    public fun decode(
         source: ByteArray,
         destination: CharArray,
         sourceStartIndex: Int = 0,
         sourceEndIndex: Int = source.size,
         destinationOffset: Int = 0,
-    ): Int
+    ): Int {
+
+        require(sourceStartIndex >= 0 && sourceStartIndex <= sourceEndIndex) {
+            "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
+        }
+        require(sourceEndIndex <= source.size) {
+            "sourceEndIndex exceeds the number of characters in the source."
+        }
+
+        var sourceIndex = sourceStartIndex
+        var destinationIndex = destinationOffset
+
+        while (sourceIndex < sourceEndIndex) {
+
+            val possibleCodePoint = nextByte(source[sourceIndex++])
+
+            if (possibleCodePoint >= 0) {
+                when (possibleCodePoint) {
+                    in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
+                        destination[destinationIndex++] = possibleCodePoint.toChar()
+                    }
+                    in 0x010000..0x10FFFF -> {
+                        destination[destinationIndex++] = possibleCodePoint.highSurrogate()
+                        destination[destinationIndex++] = possibleCodePoint.lowSurrogate()
+                    }
+                    else -> {
+                        destination[destinationIndex++] = REPLACEMENT_CHAR
+                    }
+                }
+            }
+        }
+
+        return destinationIndex - destinationOffset
+    }
+
+    protected abstract fun nextByte(value: Byte): Int
 
     public abstract fun reset(): Unit
 }

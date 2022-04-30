@@ -23,75 +23,24 @@ public class Utf32LeDecoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    public override fun decode(
-        source: ByteArray,
-        destination: CharArray,
-        sourceStartIndex: Int,
-        sourceEndIndex: Int,
-        destinationOffset: Int,
-    ): Int {
-
-        var destinationIndex = destinationOffset
-
-        require(sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be equal to or less than sourceEndIndex."
+    protected override fun nextByte(value: Byte): Int =
+        if (currentByteCount < 3) {
+            currentBytes[currentByteCount++] = value
+            -1
+        } else {
+            currentByteCount = 0
+            (
+                (currentBytes[0].toInt() and 0xFF) or
+                (currentBytes[1].toInt() and 0xFF shl 8) or
+                (currentBytes[2].toInt() and 0xFF shl 16) or
+                (value.toInt() and 0xFF shl 24)
+            )
         }
-
-        val bytesToDecode = sourceEndIndex - sourceStartIndex
-
-        require(bytesToDecode <= source.size) {
-            "The number of bytes to decode exceeds the number of bytes in the source."
-        }
-
-        val iterator = source.iterator()
-        var bytesDecoded = 0
-
-        repeat(sourceStartIndex) {
-            iterator.next()
-        }
-
-        while (bytesDecoded < bytesToDecode) {
-
-            if (currentByteCount < 3) {
-                currentBytes[currentByteCount++] = iterator.next()
-            } else {
-                val currentValue =
-                    (
-                        (currentBytes[0].toInt() and 0xFF) or
-                        (currentBytes[1].toInt() and 0xFF shl 8) or
-                        (currentBytes[2].toInt() and 0xFF shl 16) or
-                        (iterator.next().toInt() and 0xFF shl 24)
-                    )
-                when (currentValue) {
-                    in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
-                        destination[destinationIndex++] = currentValue.toChar()
-                    }
-                    in 0x010000..0x10FFFF -> {
-                        destination[destinationIndex++] = currentValue.highSurrogate()
-                        destination[destinationIndex++] = currentValue.lowSurrogate()
-                    }
-                    else -> {
-                        destination[destinationIndex++] = REPLACEMENT_CHAR
-                    }
-                }
-                currentByteCount = 0
-            }
-
-            bytesDecoded++
-        }
-
-        return destinationIndex - destinationOffset
-    }
 
     public override fun reset(): Unit {
         currentBytes[0] = 0x00
         currentBytes[1] = 0x00
         currentBytes[2] = 0x00
         currentByteCount = 0
-    }
-
-    private companion object {
-
-        private const val REPLACEMENT_CHAR = '�'
     }
 }

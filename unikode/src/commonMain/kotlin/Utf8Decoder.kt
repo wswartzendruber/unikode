@@ -25,107 +25,68 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    public override fun decode(
-        source: ByteArray,
-        destination: CharArray,
-        sourceStartIndex: Int,
-        sourceEndIndex: Int,
-        destinationOffset: Int,
-    ): Int {
+    protected override fun nextByte(value: Byte): Int {
 
-        var destinationIndex = destinationOffset
+        val valueInt = value.toInt()
 
-        require(sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be equal to or less than sourceEndIndex."
-        }
-
-        val bytesToDecode = sourceEndIndex - sourceStartIndex
-
-        require(bytesToDecode <= source.size) {
-            "The number of bytes to decode exceeds the number of bytes in the source."
-        }
-
-        val iterator = source.iterator()
-        var bytesDecoded = 0
-
-        repeat(sourceStartIndex) {
-            iterator.next()
-        }
-
-        while (bytesDecoded < bytesToDecode) {
-
-            val currentByte = iterator.next()
-            val currentByteValue = currentByte.toInt()
-
-            if (!continuing) {
-                if (currentByteValue and -0x80 == 0x00) {
-                    destination[destinationIndex++] = currentByteValue.toChar()
-                } else if (currentByteValue and -0x20 == -0x40) {
-                    continuing = true
-                    currentBytes[0] = currentByte
-                    currentBytesExpected = 2
-                    currentByteCount = 1
-                } else if (currentByteValue and -0x10 == -0x20) {
-                    continuing = true
-                    currentBytes[0] = currentByte
-                    currentBytesExpected = 3
-                    currentByteCount = 1
-                } else if (currentByteValue and -0x08 == -0x10) {
-                    continuing = true
-                    currentBytes[0] = currentByte
-                    currentBytesExpected = 4
-                    currentByteCount = 1
+        return if (!continuing) {
+            if (valueInt and -0x80 == 0x00) {
+                valueInt
+            } else if (valueInt and -0x20 == -0x40) {
+                continuing = true
+                currentBytes[0] = value
+                currentBytesExpected = 2
+                currentByteCount = 1
+                -1
+            } else if (valueInt and -0x10 == -0x20) {
+                continuing = true
+                currentBytes[0] = value
+                currentBytesExpected = 3
+                currentByteCount = 1
+                -1
+            } else if (valueInt and -0x08 == -0x10) {
+                continuing = true
+                currentBytes[0] = value
+                currentBytesExpected = 4
+                currentByteCount = 1
+                -1
+            } else {
+                REPLACEMENT_CHAR.code
+            }
+        } else {
+            if (valueInt and -0x40 == -0x80) {
+                currentBytes[currentByteCount++] = value
+                if (currentByteCount == currentBytesExpected) {
+                    val codePoint = when (currentBytesExpected) {
+                        2 -> {
+                            (currentBytes[0].toInt() and 0x1F shl 6) or
+                                (currentBytes[1].toInt() and 0x3F)
+                        }
+                        3 -> {
+                            (currentBytes[0].toInt() and 0x0F shl 12) or
+                                (currentBytes[1].toInt() and 0x3F shl 6) or
+                                (currentBytes[2].toInt() and 0x3F)
+                        }
+                        4 -> {
+                            (currentBytes[0].toInt() and 0x07 shl 18) or
+                                (currentBytes[1].toInt() and 0x3F shl 12) or
+                                (currentBytes[2].toInt() and 0x3F shl 6) or
+                                (currentBytes[3].toInt() and 0x3F)
+                        }
+                        else -> {
+                            throw IllegalStateException("Internal state is irrational.")
+                        }
+                    }
+                    reset()
+                    codePoint
                 } else {
-                    destination[destinationIndex++] = REPLACEMENT_CHAR
+                    -1
                 }
             } else {
-                if (currentByteValue and -0x40 == -0x80) {
-                    currentBytes[currentByteCount++] = currentByte
-                    if (currentByteCount == currentBytesExpected) {
-                        val codePoint = when (currentBytesExpected) {
-                            2 -> {
-                                (currentBytes[0].toInt() and 0x1F shl 6) or
-                                    (currentBytes[1].toInt() and 0x3F)
-                            }
-                            3 -> {
-                                (currentBytes[0].toInt() and 0x0F shl 12) or
-                                    (currentBytes[1].toInt() and 0x3F shl 6) or
-                                    (currentBytes[2].toInt() and 0x3F)
-                            }
-                            4 -> {
-                                (currentBytes[0].toInt() and 0x07 shl 18) or
-                                    (currentBytes[1].toInt() and 0x3F shl 12) or
-                                    (currentBytes[2].toInt() and 0x3F shl 6) or
-                                    (currentBytes[3].toInt() and 0x3F)
-                            }
-                            else -> {
-                                throw IllegalStateException("Internal state is irrational.")
-                            }
-                        }
-                        when (codePoint) {
-                            in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
-                                destination[destinationIndex++] = codePoint.toChar()
-                            }
-                            in 0x010000..0x10FFFF -> {
-                                destination[destinationIndex++] = codePoint.highSurrogate()
-                                destination[destinationIndex++] = codePoint.lowSurrogate()
-                            }
-                            else -> {
-                                destination[destinationIndex++] = REPLACEMENT_CHAR
-                            }
-                        }
-                        reset()
-                    }
-                } else {
-                    destination[destinationIndex++] = REPLACEMENT_CHAR
-                    reset()
-                }
+                reset()
+                REPLACEMENT_CHAR.code
             }
-
-            bytesDecoded++
         }
-
-        return destinationIndex - destinationOffset
     }
 
     public override fun reset(): Unit {
@@ -136,10 +97,5 @@ public class Utf8Decoder : Decoder() {
         currentBytes[3] = 0x00
         currentBytesExpected = 0
         currentByteCount = 0
-    }
-
-    private companion object {
-
-        private const val REPLACEMENT_CHAR = '�'
     }
 }

@@ -69,7 +69,7 @@ public abstract class Encoder {
                     if (highSurrogate != null) {
                         destinationIndex += writeNextCodePoint(
                             destination, destinationIndex,
-                            REPLACEMENT_CHAR,
+                            REPLACEMENT_CHAR.code,
                         )
                         instanceHighSurrogate = null
                     }
@@ -82,7 +82,7 @@ public abstract class Encoder {
                     if (highSurrogate != null) {
                         destinationIndex += writeNextCodePoint(
                             destination, destinationIndex,
-                            REPLACEMENT_CHAR,
+                            REPLACEMENT_CHAR.code,
                         )
                     }
                     instanceHighSurrogate = currentChar
@@ -97,7 +97,7 @@ public abstract class Encoder {
                     } else {
                         destinationIndex += writeNextCodePoint(
                             destination, destinationIndex,
-                            REPLACEMENT_CHAR,
+                            REPLACEMENT_CHAR.code,
                         )
                     }
                 }
@@ -121,9 +121,4 @@ public abstract class Encoder {
     }
 
     protected open fun resetState(): Unit { }
-
-    private companion object {
-
-        private const val REPLACEMENT_CHAR = 0xFFFD
-    }
 }

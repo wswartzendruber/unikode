@@ -18,95 +18,67 @@ package org.unikode
 
 public class Utf16BeDecoder : Decoder() {
 
-    private var continuing = false
-    private var currentByte: Byte = 0x00
+    private var instanceBufferedByte: Byte? = null
     private var instanceHighSurrogate: Char? = null
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    public override fun decode(
-        source: ByteArray,
-        destination: CharArray,
-        sourceStartIndex: Int,
-        sourceEndIndex: Int,
-        destinationOffset: Int,
-    ): Int {
+    protected override fun nextByte(value: Byte): Int {
 
-        var destinationIndex = destinationOffset
+        val bufferedByte = instanceBufferedByte
+        val highSurrogate = instanceHighSurrogate
 
-        require(sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be equal to or less than sourceEndIndex."
-        }
-
-        val bytesToDecode = sourceEndIndex - sourceStartIndex
-
-        require(bytesToDecode <= source.size) {
-            "The number of bytes to decode exceeds the number of bytes in the source."
-        }
-
-        val iterator = source.iterator()
-        var bytesDecoded = 0
-
-        repeat(sourceStartIndex) {
-            iterator.next()
-        }
-
-        while (bytesDecoded < bytesToDecode) {
-
-            if (!continuing) {
-                currentByte = iterator.next()
-                continuing = true
+        return if (highSurrogate == null) {
+            if (bufferedByte == null) {
+                instanceBufferedByte = value
+                -1
             } else {
-                val highSurrogate = instanceHighSurrogate
-                val currentChar =
-                    (
-                        (currentByte.toInt() and 0xFF shl 8) or
-                        (iterator.next().toInt() and 0xFF)
-                    )
-                    .toChar()
+                val char = bytePairToChar(bufferedByte, value)
                 when {
-                    !currentChar.isSurrogate() -> {
-                        if (highSurrogate != null) {
-                            destination[destinationIndex++] = REPLACEMENT_CHAR
-                            instanceHighSurrogate = null
-                        }
-                        destination[destinationIndex++] = currentChar
+                    !char.isSurrogate() -> {
+                        reset()
+                        char.code
                     }
-                    currentChar.isHighSurrogate() -> {
-                        if (highSurrogate != null)
-                            destination[destinationIndex++] = REPLACEMENT_CHAR
-                        instanceHighSurrogate = currentChar
+                    char.isHighSurrogate() -> {
+                        instanceHighSurrogate = char
+                        instanceBufferedByte = null
+                        -1
                     }
-                    currentChar.isLowSurrogate() -> {
-                        if (highSurrogate != null) {
-                            destination[destinationIndex++] = highSurrogate
-                            destination[destinationIndex++] = currentChar
-                            instanceHighSurrogate = null
-                        } else {
-                            destination[destinationIndex++] = REPLACEMENT_CHAR
-                        }
+                    char.isLowSurrogate() -> {
+                        reset()
+                        REPLACEMENT_CHAR.code
                     }
                     else -> {
                         throw IllegalStateException("Internal state is irrational.")
                     }
                 }
-                continuing = false
             }
-
-            bytesDecoded++
+        } else {
+            if (bufferedByte == null) {
+                instanceBufferedByte = value
+                -1
+            } else {
+                val char = bytePairToChar(bufferedByte, value)
+                if (char.isLowSurrogate()) {
+                    val codePoint = codePoint(highSurrogate, char)
+                    reset()
+                    codePoint
+                } else {
+                    reset()
+                    REPLACEMENT_CHAR.code
+                }
+            }
         }
-
-        return destinationIndex - destinationOffset
     }
 
     public override fun reset(): Unit {
-        continuing = false
-        currentByte = 0x00
+        instanceBufferedByte =  null
         instanceHighSurrogate = null
     }
 
     private companion object {
 
-        private const val REPLACEMENT_CHAR = '�'
+        private fun bytePairToChar(high: Byte, low: Byte) =
+            ((high.toInt() shl 8) or (low.toInt() and 0xFF)).toChar()
     }
 }
