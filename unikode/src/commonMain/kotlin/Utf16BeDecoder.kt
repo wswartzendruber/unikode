@@ -23,30 +23,28 @@ public class Utf16BeDecoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    protected override fun nextByte(value: Byte): Int {
+    protected override fun nextByte(value: Byte): Unit {
 
         val bufferedByte = instanceBufferedByte
         val highSurrogate = instanceHighSurrogate
 
-        return if (highSurrogate == null) {
+        if (highSurrogate == null) {
             if (bufferedByte == null) {
                 instanceBufferedByte = value
-                -1
             } else {
                 val char = bytePairToChar(bufferedByte, value)
                 when {
                     !char.isSurrogate() -> {
                         reset()
-                        char.code
+                        writeNextCodePoint(char.code)
                     }
                     char.isHighSurrogate() -> {
                         instanceHighSurrogate = char
                         instanceBufferedByte = null
-                        -1
                     }
                     char.isLowSurrogate() -> {
                         reset()
-                        REPLACEMENT_CHAR.code
+                        writeNextCodePoint(REPLACEMENT_CHAR.code)
                     }
                     else -> {
                         throw IllegalStateException("Internal state is irrational.")
@@ -56,16 +54,15 @@ public class Utf16BeDecoder : Decoder() {
         } else {
             if (bufferedByte == null) {
                 instanceBufferedByte = value
-                -1
             } else {
                 val char = bytePairToChar(bufferedByte, value)
                 if (char.isLowSurrogate()) {
                     val codePoint = codePoint(highSurrogate, char)
                     reset()
-                    codePoint
+                    writeNextCodePoint(codePoint)
                 } else {
                     reset()
-                    REPLACEMENT_CHAR.code
+                    writeNextCodePoint(REPLACEMENT_CHAR.code)
                 }
             }
         }

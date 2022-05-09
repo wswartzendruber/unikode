@@ -23,13 +23,12 @@ public class Utf32LeDecoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    protected override fun nextByte(value: Byte): Int =
+    protected override fun nextByte(value: Byte): Unit =
         if (currentByteCount < 3) {
             currentBytes[currentByteCount++] = value
-            -1
         } else {
             currentByteCount = 0
-            (
+            writeNextCodePoint(
                 (currentBytes[0].toInt() and 0xFF) or
                 (currentBytes[1].toInt() and 0xFF shl 8) or
                 (currentBytes[2].toInt() and 0xFF shl 16) or

@@ -18,6 +18,9 @@ package org.unikode
 
 public abstract class Decoder {
 
+    private var destination = CharArray(0)
+    private var destinationIndex = 0
+
     public abstract fun maxCharsNeeded(byteCount: Int): Int
 
     public fun decode(
@@ -36,32 +39,31 @@ public abstract class Decoder {
         }
 
         var sourceIndex = sourceStartIndex
-        var destinationIndex = destinationOffset
 
-        while (sourceIndex < sourceEndIndex) {
+        this.destination = destination
+        destinationIndex = destinationOffset
 
-            val possibleCodePoint = nextByte(source[sourceIndex++])
-
-            if (possibleCodePoint >= 0) {
-                when (possibleCodePoint) {
-                    in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
-                        destination[destinationIndex++] = possibleCodePoint.toChar()
-                    }
-                    in 0x010000..0x10FFFF -> {
-                        destination[destinationIndex++] = possibleCodePoint.highSurrogate()
-                        destination[destinationIndex++] = possibleCodePoint.lowSurrogate()
-                    }
-                    else -> {
-                        destination[destinationIndex++] = REPLACEMENT_CHAR
-                    }
-                }
-            }
-        }
+        while (sourceIndex < sourceEndIndex)
+            nextByte(source[sourceIndex++])
 
         return destinationIndex - destinationOffset
     }
 
-    protected abstract fun nextByte(value: Byte): Int
+    protected abstract fun nextByte(value: Byte): Unit
+
+    protected fun writeNextCodePoint(value: Int): Unit =
+        when (value) {
+            in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
+                destination[destinationIndex++] = value.toChar()
+            }
+            in 0x010000..0x10FFFF -> {
+                destination[destinationIndex++] = value.highSurrogate()
+                destination[destinationIndex++] = value.lowSurrogate()
+            }
+            else -> {
+                destination[destinationIndex++] = REPLACEMENT_CHAR
+            }
+        }
 
     public abstract fun reset(): Unit
 }
