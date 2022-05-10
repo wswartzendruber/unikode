@@ -18,9 +18,6 @@ package org.unikode
 
 public abstract class Decoder {
 
-    private var destination = CharArray(0)
-    private var destinationIndex = 0
-
     public abstract fun maxCharsNeeded(byteCount: Int): Int
 
     public fun decode(
@@ -39,31 +36,29 @@ public abstract class Decoder {
         }
 
         var sourceIndex = sourceStartIndex
-
-        this.destination = destination
-        destinationIndex = destinationOffset
+        var destinationIndex = destinationOffset
+        val writeNextCodePoint = { value: Int ->
+            when (value) {
+                in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
+                    destination[destinationIndex++] = value.toChar()
+                }
+                in 0x010000..0x10FFFF -> {
+                    destination[destinationIndex++] = value.highSurrogate()
+                    destination[destinationIndex++] = value.lowSurrogate()
+                }
+                else -> {
+                    destination[destinationIndex++] = REPLACEMENT_CHAR
+                }
+            }
+        }
 
         while (sourceIndex < sourceEndIndex)
-            nextByte(source[sourceIndex++])
+            nextByte(source[sourceIndex++], writeNextCodePoint)
 
         return destinationIndex - destinationOffset
     }
 
-    protected abstract fun nextByte(value: Byte): Unit
-
-    protected fun writeNextCodePoint(value: Int): Unit =
-        when (value) {
-            in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
-                destination[destinationIndex++] = value.toChar()
-            }
-            in 0x010000..0x10FFFF -> {
-                destination[destinationIndex++] = value.highSurrogate()
-                destination[destinationIndex++] = value.lowSurrogate()
-            }
-            else -> {
-                destination[destinationIndex++] = REPLACEMENT_CHAR
-            }
-        }
+    protected abstract fun nextByte(value: Byte, callback: (Int) -> Unit): Unit
 
     public abstract fun reset(): Unit
 }

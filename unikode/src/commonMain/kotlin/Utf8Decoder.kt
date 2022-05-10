@@ -25,13 +25,13 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    protected override fun nextByte(value: Byte): Unit {
+    protected override fun nextByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val valueInt = value.toInt()
 
         if (!continuing) {
             if (valueInt and -0x80 == 0x00) {
-                writeNextCodePoint(valueInt)
+                callback(valueInt)
             } else if (valueInt and -0x20 == -0x40) {
                 continuing = true
                 currentBytes[0] = value
@@ -48,7 +48,7 @@ public class Utf8Decoder : Decoder() {
                 currentBytesExpected = 4
                 currentByteCount = 1
             } else {
-                writeNextCodePoint(REPLACEMENT_CHAR.code)
+                callback(REPLACEMENT_CHAR.code)
             }
         } else {
             if (valueInt and -0x40 == -0x80) {
@@ -75,11 +75,11 @@ public class Utf8Decoder : Decoder() {
                         }
                     }
                     reset()
-                    writeNextCodePoint(codePoint)
+                    callback(codePoint)
                 }
             } else {
                 reset()
-                writeNextCodePoint(REPLACEMENT_CHAR.code)
+                callback(REPLACEMENT_CHAR.code)
             }
         }
     }

@@ -23,7 +23,7 @@ public class Utf16BeDecoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    protected override fun nextByte(value: Byte): Unit {
+    protected override fun nextByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val bufferedByte = instanceBufferedByte
         val highSurrogate = instanceHighSurrogate
@@ -36,7 +36,7 @@ public class Utf16BeDecoder : Decoder() {
                 when {
                     !char.isSurrogate() -> {
                         reset()
-                        writeNextCodePoint(char.code)
+                        callback(char.code)
                     }
                     char.isHighSurrogate() -> {
                         instanceHighSurrogate = char
@@ -44,7 +44,7 @@ public class Utf16BeDecoder : Decoder() {
                     }
                     char.isLowSurrogate() -> {
                         reset()
-                        writeNextCodePoint(REPLACEMENT_CHAR.code)
+                        callback(REPLACEMENT_CHAR.code)
                     }
                     else -> {
                         throw IllegalStateException("Internal state is irrational.")
@@ -59,10 +59,10 @@ public class Utf16BeDecoder : Decoder() {
                 if (char.isLowSurrogate()) {
                     val codePoint = codePoint(highSurrogate, char)
                     reset()
-                    writeNextCodePoint(codePoint)
+                    callback(codePoint)
                 } else {
                     reset()
-                    writeNextCodePoint(REPLACEMENT_CHAR.code)
+                    callback(REPLACEMENT_CHAR.code)
                 }
             }
         }
