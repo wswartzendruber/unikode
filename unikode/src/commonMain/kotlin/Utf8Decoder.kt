@@ -26,32 +26,35 @@ public class Utf8Decoder : Decoder() {
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
     protected override fun nextByte(value: Byte, callback: (Int) -> Unit): Unit {
-
-        val valueInt = value.toInt()
-
         if (!continuing) {
-            if (valueInt and -0x80 == 0x00) {
-                callback(valueInt)
-            } else if (valueInt and -0x20 == -0x40) {
-                continuing = true
-                currentBytes[0] = value
-                currentBytesExpected = 2
-                currentByteCount = 1
-            } else if (valueInt and -0x10 == -0x20) {
-                continuing = true
-                currentBytes[0] = value
-                currentBytesExpected = 3
-                currentByteCount = 1
-            } else if (valueInt and -0x08 == -0x10) {
-                continuing = true
-                currentBytes[0] = value
-                currentBytesExpected = 4
-                currentByteCount = 1
-            } else {
-                callback(REPLACEMENT_CHAR.code)
+            when (value) {
+                in 0x00..0x7F -> {
+                    callback(value.toInt())
+                }
+                in -0x40..-0x21 -> {
+                    continuing = true
+                    currentBytes[0] = value
+                    currentBytesExpected = 2
+                    currentByteCount = 1
+                }
+                in -0x20..-0x11 -> {
+                    continuing = true
+                    currentBytes[0] = value
+                    currentBytesExpected = 3
+                    currentByteCount = 1
+                }
+                in -0x10..-0x09 -> {
+                    continuing = true
+                    currentBytes[0] = value
+                    currentBytesExpected = 4
+                    currentByteCount = 1
+                }
+                else -> {
+                    callback(REPLACEMENT_CHAR.code)
+                }
             }
         } else {
-            if (valueInt and -0x40 == -0x80) {
+            if (value in -0x80..-0x41) {
                 currentBytes[currentByteCount++] = value
                 if (currentByteCount == currentBytesExpected) {
                     val codePoint = when (currentBytesExpected) {
@@ -80,6 +83,7 @@ public class Utf8Decoder : Decoder() {
             } else {
                 reset()
                 callback(REPLACEMENT_CHAR.code)
+                nextByte(value, callback)
             }
         }
     }
