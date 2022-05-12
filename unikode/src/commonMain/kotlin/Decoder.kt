@@ -53,12 +53,12 @@ public abstract class Decoder {
         }
 
         while (sourceIndex < sourceEndIndex)
-            nextByte(source[sourceIndex++], writeNextCodePoint)
+            nextByte(source[sourceIndex++].toInt() and 0xFF, writeNextCodePoint)
 
         return destinationIndex - destinationOffset
     }
 
-    protected abstract fun nextByte(value: Byte, callback: (Int) -> Unit): Unit
+    protected abstract fun nextByte(value: Int, callback: (Int) -> Unit): Unit
 
     public abstract fun reset(): Unit
 }

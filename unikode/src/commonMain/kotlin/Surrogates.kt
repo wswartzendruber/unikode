@@ -17,7 +17,10 @@
 package org.unikode
 
 public fun codePoint(highSurrogate: Char, lowSurrogate: Char): Int =
-    (((highSurrogate.code - 0xD800) shl 10) or (lowSurrogate.code - 0xDC00)) + 0x10000
+    codePoint(highSurrogate.code, lowSurrogate.code)
+
+public fun codePoint(highSurrogate: Int, lowSurrogate: Int): Int =
+    (((highSurrogate - 0xD800) shl 10) or (lowSurrogate - 0xDC00)) + 0x10000
 
 public fun Int.highSurrogate(): Char = (((this - 0x10000) ushr 10) + 0xD800).toChar()
 

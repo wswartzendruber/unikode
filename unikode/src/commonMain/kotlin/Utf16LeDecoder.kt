@@ -16,66 +16,7 @@
 
 package org.unikode
 
-public class Utf16LeDecoder : Decoder() {
+public class Utf16LeDecoder : Utf16Decoder() {
 
-    private var instanceBufferedByte: Byte? = null
-    private var instanceHighSurrogate: Char? = null
-
-    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
-
-    protected override fun nextByte(value: Byte, callback: (Int) -> Unit): Unit {
-
-        val bufferedByte = instanceBufferedByte
-        val highSurrogate = instanceHighSurrogate
-
-        if (highSurrogate == null) {
-            if (bufferedByte == null) {
-                instanceBufferedByte = value
-            } else {
-                val char = bytePairToChar(bufferedByte, value)
-                when {
-                    !char.isSurrogate() -> {
-                        reset()
-                        callback(char.code)
-                    }
-                    char.isHighSurrogate() -> {
-                        instanceHighSurrogate = char
-                        instanceBufferedByte = null
-                    }
-                    char.isLowSurrogate() -> {
-                        reset()
-                        callback(REPLACEMENT_CHAR.code)
-                    }
-                    else -> {
-                        throw IllegalStateException("Internal state is irrational.")
-                    }
-                }
-            }
-        } else {
-            if (bufferedByte == null) {
-                instanceBufferedByte = value
-            } else {
-                val char = bytePairToChar(bufferedByte, value)
-                if (char.isLowSurrogate()) {
-                    val codePoint = codePoint(highSurrogate, char)
-                    reset()
-                    callback(codePoint)
-                } else {
-                    reset()
-                    callback(REPLACEMENT_CHAR.code)
-                }
-            }
-        }
-    }
-
-    public override fun reset(): Unit {
-        instanceBufferedByte =  null
-        instanceHighSurrogate = null
-    }
-
-    private companion object {
-
-        private fun bytePairToChar(high: Byte, low: Byte) =
-            ((high.toInt() and 0xFF) or (low.toInt() shl 8)).toChar()
-    }
+    protected override fun bytePairToChar(high: Int, low: Int): Int = high or (low shl 8)
 }

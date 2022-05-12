@@ -19,31 +19,31 @@ package org.unikode
 public class Utf8Decoder : Decoder() {
 
     private var continuing = false
-    private val currentBytes = ByteArray(4)
+    private val currentBytes = IntArray(4)
     private var currentBytesExpected = 0
     private var currentByteCount = 0
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    protected override fun nextByte(value: Byte, callback: (Int) -> Unit): Unit {
+    protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit {
         if (!continuing) {
-            when (value) {
-                in 0x00..0x7F -> {
-                    callback(value.toInt())
+            when {
+                value and 0x80 == 0x00 -> {
+                    callback(value)
                 }
-                in -0x40..-0x21 -> {
+                value and 0xE0 == 0xC0 -> {
                     continuing = true
                     currentBytes[0] = value
                     currentBytesExpected = 2
                     currentByteCount = 1
                 }
-                in -0x20..-0x11 -> {
+                value and 0xF0 == 0xE0 -> {
                     continuing = true
                     currentBytes[0] = value
                     currentBytesExpected = 3
                     currentByteCount = 1
                 }
-                in -0x10..-0x09 -> {
+                value and 0xF8 == 0xF0 -> {
                     continuing = true
                     currentBytes[0] = value
                     currentBytesExpected = 4
@@ -54,24 +54,24 @@ public class Utf8Decoder : Decoder() {
                 }
             }
         } else {
-            if (value in -0x80..-0x41) {
+            if (value and 0xC0 == 0x80) {
                 currentBytes[currentByteCount++] = value
                 if (currentByteCount == currentBytesExpected) {
                     val codePoint = when (currentBytesExpected) {
                         2 -> {
-                            (currentBytes[0].toInt() and 0x1F shl 6) or
-                                (currentBytes[1].toInt() and 0x3F)
+                            (currentBytes[0] and 0x1F shl 6) or
+                                (currentBytes[1] and 0x3F)
                         }
                         3 -> {
-                            (currentBytes[0].toInt() and 0x0F shl 12) or
-                                (currentBytes[1].toInt() and 0x3F shl 6) or
-                                (currentBytes[2].toInt() and 0x3F)
+                            (currentBytes[0] and 0x0F shl 12) or
+                                (currentBytes[1] and 0x3F shl 6) or
+                                (currentBytes[2] and 0x3F)
                         }
                         4 -> {
-                            (currentBytes[0].toInt() and 0x07 shl 18) or
-                                (currentBytes[1].toInt() and 0x3F shl 12) or
-                                (currentBytes[2].toInt() and 0x3F shl 6) or
-                                (currentBytes[3].toInt() and 0x3F)
+                            (currentBytes[0] and 0x07 shl 18) or
+                                (currentBytes[1] and 0x3F shl 12) or
+                                (currentBytes[2] and 0x3F shl 6) or
+                                (currentBytes[3] and 0x3F)
                         }
                         else -> {
                             throw IllegalStateException("Internal state is irrational.")
