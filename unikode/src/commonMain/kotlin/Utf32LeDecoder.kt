@@ -16,30 +16,11 @@
 
 package org.unikode
 
-public class Utf32LeDecoder : Decoder() {
+public class Utf32LeDecoder : Utf32Decoder() {
 
-    private val currentBytes = IntArray(3)
-    private var currentByteCount = 0
-
-    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
-
-    protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit =
-        if (currentByteCount < 3) {
-            currentBytes[currentByteCount++] = value
-        } else {
-            currentByteCount = 0
-            callback(
-                currentBytes[0] or
-                (currentBytes[1] shl 8) or
-                (currentBytes[2] shl 16) or
-                (value shl 24)
-            )
-        }
-
-    public override fun reset(): Unit {
-        currentBytes[0] = 0x00
-        currentBytes[1] = 0x00
-        currentBytes[2] = 0x00
-        currentByteCount = 0
-    }
+    protected override fun currentBytesToCodePoint(): Int =
+        currentBytes[0] or
+        (currentBytes[1] shl 8) or
+        (currentBytes[2] shl 16) or
+        (currentBytes[3] shl 24)
 }
