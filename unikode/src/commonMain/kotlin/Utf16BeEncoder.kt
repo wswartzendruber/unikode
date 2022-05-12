@@ -16,11 +16,7 @@
 
 package org.unikode
 
-public class Utf16BeEncoder : Encoder() {
-
-    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 2
-
-    public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
+public class Utf16BeEncoder : Utf16Encoder() {
 
     protected override fun writeNextCodePoint(
         destination: ByteArray,
@@ -38,12 +34,5 @@ public class Utf16BeEncoder : Encoder() {
         destination[offset + 2] = (lowSurrogate ushr 8).toByte()
         destination[offset + 3] = (lowSurrogate and 0xFF).toByte()
         4
-    }
-
-    private companion object {
-
-        private fun Int.highSurrogate() = ((this - 0x10000) ushr 10) + 0xD800
-
-        private fun Int.lowSurrogate() = ((this - 0x10000) and 0x3FF) + 0xDC00
     }
 }

@@ -16,11 +16,7 @@
 
 package org.unikode
 
-public class Utf32BeEncoder : Encoder() {
-
-    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
-
-    public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
+public class Utf32BeEncoder : Utf32Encoder() {
 
     protected override fun writeNextCodePoint(
         destination: ByteArray,

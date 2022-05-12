@@ -16,19 +16,9 @@
 
 package org.unikode
 
-public class Utf32LeEncoder : Utf32Encoder() {
+public abstract class Utf32Encoder : Encoder() {
 
-    protected override fun writeNextCodePoint(
-        destination: ByteArray,
-        offset: Int,
-        value: Int,
-    ): Int {
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
 
-        destination[offset] = (value and 0xFF).toByte()
-        destination[offset + 1] = (value and 0xFF00 ushr 8).toByte()
-        destination[offset + 2] = (value and 0xFF0000 ushr 16).toByte()
-        destination[offset + 3] = 0x0
-
-        return 4
-    }
+    public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
 }
