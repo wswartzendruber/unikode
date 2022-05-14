@@ -17,3 +17,24 @@
 package org.unikode
 
 public const val REPLACEMENT_CHAR: Char = '�'
+
+public fun CharSequence.toUtf8ByteArray(): ByteArray = this.asIterable().toUtf8ByteArray()
+
+public fun Iterable<Char>.toUtf8ByteArray(): ByteArray {
+
+    val iterator = this.iterator()
+    val buffer = ByteArray(1024)
+    val encoder = Utf8Encoder()
+    val maxCharCount = encoder.maxCharsPossible(buffer.size)
+    var charsRemaining = this.length
+    val bytes = mutableListOf<Byte>()
+
+    while (charsRemaining > 0) {
+
+        val bytesEncoded = encoder.encode(iterator, maxCharCount, buffer)
+
+        bytes.addAll(buffer.slice(0 until bytesEncoded))
+    }
+
+    return bytes.toByteArray()
+}

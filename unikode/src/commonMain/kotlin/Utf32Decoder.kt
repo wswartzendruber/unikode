@@ -24,6 +24,8 @@ public abstract class Utf32Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
+    public override fun maxBytesPossbile(charCount: Int): Int = charCount * 4
+
     protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit {
         currentBytes[currentByteCount++] = value
         if (currentByteCount == 4) {

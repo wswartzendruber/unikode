@@ -20,6 +20,8 @@ public abstract class Decoder {
 
     public abstract fun maxCharsNeeded(byteCount: Int): Int
 
+    public abstract fun maxBytesPossbile(charCount: Int): Int
+
     public fun decode(
         source: ByteArray,
         destination: CharArray,

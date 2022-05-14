@@ -25,6 +25,8 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
+    public override fun maxBytesPossbile(charCount: Int): Int = charCount
+
     protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit {
         if (!continuing) {
             when {

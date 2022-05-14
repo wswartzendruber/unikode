@@ -23,6 +23,8 @@ public abstract class Utf16Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
+    public override fun maxBytesPossbile(charCount: Int): Int = charCount * 2
+
     protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit {
 
         val bufferedByte = instanceBufferedByte
