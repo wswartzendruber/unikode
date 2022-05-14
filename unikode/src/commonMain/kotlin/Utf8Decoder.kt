@@ -27,27 +27,30 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxBytesPossbile(charCount: Int): Int = charCount
 
-    protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit {
+    public override fun inputByte(value: Byte, callback: (Int) -> Unit): Unit {
+
+        val valueInt = value.toInt()
+
         if (!continuing) {
             when {
-                value and 0x80 == 0x00 -> {
-                    callback(value)
+                valueInt and 0x80 == 0x00 -> {
+                    callback(valueInt)
                 }
-                value and 0xE0 == 0xC0 -> {
+                valueInt and 0xE0 == 0xC0 -> {
                     continuing = true
-                    currentBytes[0] = value
+                    currentBytes[0] = valueInt
                     currentBytesExpected = 2
                     currentByteCount = 1
                 }
-                value and 0xF0 == 0xE0 -> {
+                valueInt and 0xF0 == 0xE0 -> {
                     continuing = true
-                    currentBytes[0] = value
+                    currentBytes[0] = valueInt
                     currentBytesExpected = 3
                     currentByteCount = 1
                 }
-                value and 0xF8 == 0xF0 -> {
+                valueInt and 0xF8 == 0xF0 -> {
                     continuing = true
-                    currentBytes[0] = value
+                    currentBytes[0] = valueInt
                     currentBytesExpected = 4
                     currentByteCount = 1
                 }
@@ -56,8 +59,8 @@ public class Utf8Decoder : Decoder() {
                 }
             }
         } else {
-            if (value and 0xC0 == 0x80) {
-                currentBytes[currentByteCount++] = value
+            if (valueInt and 0xC0 == 0x80) {
+                currentBytes[currentByteCount++] = valueInt
                 if (currentByteCount == currentBytesExpected) {
                     val codePoint = when (currentBytesExpected) {
                         2 -> {
@@ -85,7 +88,7 @@ public class Utf8Decoder : Decoder() {
             } else {
                 reset()
                 callback(REPLACEMENT_CHAR.code)
-                nextByte(value, callback)
+                inputByte(value, callback)
             }
         }
     }

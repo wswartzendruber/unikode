@@ -25,16 +25,17 @@ public abstract class Utf16Decoder : Decoder() {
 
     public override fun maxBytesPossbile(charCount: Int): Int = charCount * 2
 
-    protected override fun nextByte(value: Int, callback: (Int) -> Unit): Unit {
+    public override fun inputByte(value: Byte, callback: (Int) -> Unit): Unit {
 
+        val valueInt = value.toInt() and 0xFF
         val bufferedByte = instanceBufferedByte
         val highSurrogate = instanceHighSurrogate
 
         if (highSurrogate == -1) {
             if (bufferedByte == -1) {
-                instanceBufferedByte = value
+                instanceBufferedByte = valueInt
             } else {
-                val char = bytePairToChar(bufferedByte, value)
+                val char = bytePairToChar(bufferedByte, valueInt)
                 when {
                     !char.isSurrogate() -> {
                         reset()
@@ -55,9 +56,9 @@ public abstract class Utf16Decoder : Decoder() {
             }
         } else {
             if (bufferedByte == -1) {
-                instanceBufferedByte = value
+                instanceBufferedByte = valueInt
             } else {
-                val char = bytePairToChar(bufferedByte, value)
+                val char = bytePairToChar(bufferedByte, valueInt)
                 if (char.isLowSurrogate()) {
                     val codePoint = codePoint(highSurrogate, char)
                     reset()

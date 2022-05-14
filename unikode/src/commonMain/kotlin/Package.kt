@@ -18,9 +18,7 @@ package org.unikode
 
 public const val REPLACEMENT_CHAR: Char = '�'
 
-public fun CharSequence.toUtf8ByteArray(): ByteArray = this.asIterable().toUtf8ByteArray()
-
-public fun Iterable<Char>.toUtf8ByteArray(): ByteArray {
+public fun CharSequence.toUtf8ByteArray(): ByteArray {
 
     val iterator = this.iterator()
     val buffer = ByteArray(1024)
