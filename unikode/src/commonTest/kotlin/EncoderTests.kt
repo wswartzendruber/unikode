@@ -97,7 +97,7 @@ class EncoderTests {
     fun char_sequence_full() {
 
         val input = "Hello"
-        val output = byteArrayOf()
+        val output = ByteArray(5)
         val encoder = TestEncoder()
 
         encoder.encode(input, output)
@@ -109,7 +109,7 @@ class EncoderTests {
     fun char_sequence_slice() {
 
         val input = "Hello"
-        val output = byteArrayOf()
+        val output = ByteArray(5)
         val encoder = TestEncoder()
 
         encoder.encode(input, output, 1, 4)
@@ -118,10 +118,22 @@ class EncoderTests {
     }
 
     @Test
+    fun char_sequence_slice_offset() {
+
+        val input = "Hello"
+        val output = ByteArray(5)
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output, 1, 4, 1)
+
+        assertTrue(output contentEquals byteArrayOf(0x00, 0x01, 0x01, 0x01, 0x00))
+    }
+
+    @Test
     fun char_array_full() {
 
         val input = charArrayOf('H', 'e', 'l', 'l', 'o')
-        val output = byteArrayOf()
+        val output = ByteArray(5)
         val encoder = TestEncoder()
 
         encoder.encode(input, output)
@@ -133,7 +145,7 @@ class EncoderTests {
     fun char_array_slice() {
 
         val input = charArrayOf('H', 'e', 'l', 'l', 'o')
-        val output = byteArrayOf()
+        val output = ByteArray(5)
         val encoder = TestEncoder()
 
         encoder.encode(input, output, 1, 4)
@@ -142,15 +154,39 @@ class EncoderTests {
     }
 
     @Test
+    fun char_array_slice_offset() {
+
+        val input = charArrayOf('H', 'e', 'l', 'l', 'o')
+        val output = ByteArray(5)
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output, 1, 4, 1)
+
+        assertTrue(output contentEquals byteArrayOf(0x00, 0x01, 0x01, 0x01, 0x00))
+    }
+
+    @Test
     fun char_iterable() {
 
         val input = listOf<Char>('H', 'e', 'l', 'l', 'o')
-        val output = byteArrayOf()
+        val output = ByteArray(5)
         val encoder = TestEncoder()
 
         encoder.encode(input, output)
 
         assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+    }
+
+    @Test
+    fun char_iterable_offset() {
+
+        val input = listOf<Char>('e', 'l', 'l')
+        val output = ByteArray(5)
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output, 1)
+
+        assertTrue(output contentEquals byteArrayOf(0x00, 0x01, 0x01, 0x01, 0x00))
     }
 
     class TestEncoder : Encoder() {
@@ -162,6 +198,7 @@ class EncoderTests {
         override fun maxCharsPossible(byteCount: Int) = byteCount
 
         protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit) {
+            callback(0x01)
             codePoints.add(value)
         }
 
