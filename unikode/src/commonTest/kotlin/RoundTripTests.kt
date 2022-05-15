@@ -12,6 +12,8 @@ import kotlin.test.assertTrue
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+import org.unikode.highSurrogate
+import org.unikode.lowSurrogate
 import org.unikode.Encoder
 import org.unikode.Decoder
 import org.unikode.Utf8Encoder
@@ -51,5 +53,26 @@ class RoundTripTests {
         val endString = testCharArray.copyOfRange(0, charsUsed).concatToString()
 
         assertTrue(completeString == endString)
+    }
+
+    companion object {
+
+        val completeString = generateCompleteString()
+
+        fun generateCompleteString(): String {
+
+            val returnValue = mutableListOf<Char>()
+
+            for (i in 0x0000..0xD7FF)
+                returnValue.add(i.toChar())
+            for (i in 0xE000..0xFFFF)
+                returnValue.add(i.toChar())
+            for (i in 0x010000..0x10FFFF) {
+                returnValue.add(i.highSurrogate())
+                returnValue.add(i.lowSurrogate())
+            }
+
+            return returnValue.toCharArray().concatToString()
+        }
     }
 }

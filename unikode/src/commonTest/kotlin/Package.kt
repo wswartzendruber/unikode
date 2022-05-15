@@ -8,9 +8,6 @@
 
 package org.unikode.test
 
-import org.unikode.highSurrogate
-import org.unikode.lowSurrogate
-
 const val TEXT = "This제가Монголलुम्बिनीis가미정언гэрवनa식당에नेपालtest있어요болकेdocument🇰🇷Төвतराई😀"
 
 val textByteArrayUtf8 = byteArrayOf(
@@ -73,21 +70,3 @@ val textByteArrayUtf32Be = byteArrayOf(
     116, 0, 1, -15, -16, 0, 1, -15, -9, 0, 0, 4, 34, 0, 0, 4, -23, 0, 0, 4, 50, 0, 0, 9, 36, 0,
     0, 9, 48, 0, 0, 9, 62, 0, 0, 9, 8, 0, 1, -10, 0
 )
-
-val completeString = generateCompleteString()
-
-fun generateCompleteString(): String {
-
-    val returnValue = mutableListOf<Char>()
-
-    for (i in 0x0000..0xD7FF)
-        returnValue.add(i.toChar())
-    for (i in 0xE000..0xFFFF)
-        returnValue.add(i.toChar())
-    for (i in 0x010000..0x10FFFF) {
-        returnValue.add(i.highSurrogate())
-        returnValue.add(i.lowSurrogate())
-    }
-
-    return returnValue.toCharArray().concatToString()
-}
