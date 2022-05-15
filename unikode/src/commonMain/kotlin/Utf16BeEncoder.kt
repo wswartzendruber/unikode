@@ -18,21 +18,16 @@ package org.unikode
 
 public class Utf16BeEncoder : Utf16Encoder() {
 
-    protected override fun writeNextCodePoint(
-        destination: ByteArray,
-        offset: Int,
-        value: Int,
-    ): Int = if (value <= 0xFFFF) {
-        destination[offset] = (value ushr 8).toByte()
-        destination[offset + 1] = (value and 0xFF).toByte()
-        2
-    } else {
-        val highSurrogate = value.highSurrogate()
-        val lowSurrogate = value.lowSurrogate()
-        destination[offset] = (highSurrogate ushr 8).toByte()
-        destination[offset + 1] = (highSurrogate and 0xFF).toByte()
-        destination[offset + 2] = (lowSurrogate ushr 8).toByte()
-        destination[offset + 3] = (lowSurrogate and 0xFF).toByte()
-        4
-    }
+    protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit =
+        if (value <= 0xFFFF) {
+            callback((value ushr 8).toByte())
+            callback((value and 0xFF).toByte())
+        } else {
+            val highSurrogate = value.highSurrogate()
+            val lowSurrogate = value.lowSurrogate()
+            callback((highSurrogate ushr 8).toByte())
+            callback((highSurrogate and 0xFF).toByte())
+            callback((lowSurrogate ushr 8).toByte())
+            callback((lowSurrogate and 0xFF).toByte())
+        }
 }

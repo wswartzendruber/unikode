@@ -22,35 +22,28 @@ public class Utf8Encoder : Encoder() {
 
     public override fun maxCharsPossible(byteCount: Int): Int = byteCount
 
-    protected override fun writeNextCodePoint(
-        destination: ByteArray,
-        offset: Int,
-        value: Int,
-    ): Int = when (value) {
-        in 0x00..0x7F -> {
-            destination[offset] = value.toByte()
-            1
+    protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit =
+        when (value) {
+            in 0x00..0x7F -> {
+                callback(value.toByte())
+            }
+            in 0x080..0x7FF -> {
+                callback((0xC0 or (value ushr 6)).toByte())
+                callback((0x80 or (value and 0x3F)).toByte())
+            }
+            in 0x0800..0xFFFF -> {
+                callback((0xE0 or (value ushr 12)).toByte())
+                callback((0x80 or (value ushr 6 and 0x3F)).toByte())
+                callback((0x80 or (value and 0x3F)).toByte())
+            }
+            in 0x010000..0x10FFFF -> {
+                callback((0xF0 or (value ushr 18)).toByte())
+                callback((0x80 or (value ushr 12 and 0x3F)).toByte())
+                callback((0x80 or (value ushr 6 and 0x3F)).toByte())
+                callback((0x80 or (value and 0x3F)).toByte())
+            }
+            else -> {
+                throw IllegalStateException("Got invalid value from superclass.")
+            }
         }
-        in 0x080..0x7FF -> {
-            destination[offset] = (0xC0 or (value ushr 6)).toByte()
-            destination[offset + 1] = (0x80 or (value and 0x3F)).toByte()
-            2
-        }
-        in 0x0800..0xFFFF -> {
-            destination[offset] = (0xE0 or (value ushr 12)).toByte()
-            destination[offset + 1] = (0x80 or (value ushr 6 and 0x3F)).toByte()
-            destination[offset + 2] = (0x80 or (value and 0x3F)).toByte()
-            3
-        }
-        in 0x010000..0x10FFFF -> {
-            destination[offset] = (0xF0 or (value ushr 18)).toByte()
-            destination[offset + 1] = (0x80 or (value ushr 12 and 0x3F)).toByte()
-            destination[offset + 2] = (0x80 or (value ushr 6 and 0x3F)).toByte()
-            destination[offset + 3] = (0x80 or (value and 0x3F)).toByte()
-            4
-        }
-        else -> {
-            throw IllegalStateException("Got invalid value from superclass.")
-        }
-    }
 }

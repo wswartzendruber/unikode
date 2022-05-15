@@ -18,7 +18,7 @@ package org.unikode
 
 public abstract class Encoder {
 
-    private var instanceHighSurrogate: Char? = null
+    private var instanceHighSurrogate = -1
 
     public abstract fun maxBytesNeeded(charCount: Int): Int
 
@@ -35,88 +35,58 @@ public abstract class Encoder {
         require(sourceStartIndex >= 0 && sourceStartIndex <= sourceEndIndex) {
             "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
         }
-
-        val charsToEncode = sourceEndIndex - sourceStartIndex
-
         require(sourceEndIndex <= source.length) {
             "sourceEndIndex exceeds the number of characters in the source."
         }
 
         val subSource = source.subSequence(sourceStartIndex, sourceEndIndex)
-        val iterator = subSource.iterator()
-        val bytesEncoded = encode(iterator, charsToEncode, destination, destinationOffset)
-
-        return bytesEncoded
-    }
-
-    public fun encode(
-        source: Iterator<Char>,
-        sourceLimit: Int,
-        destination: ByteArray,
-        destinationOffset: Int = 0,
-    ): Int {
-
-        var sourceCount = 0
         var destinationIndex = destinationOffset
-
-        while (source.hasNext() && sourceCount < sourceLimit) {
-
-            val highSurrogate = instanceHighSurrogate
-            val currentChar = source.next()
-
-            when {
-                !currentChar.isSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destinationIndex += writeNextCodePoint(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR.code,
-                        )
-                        instanceHighSurrogate = null
-                    }
-                    destinationIndex += writeNextCodePoint(
-                        destination, destinationIndex,
-                        currentChar.code,
-                    )
-                }
-                currentChar.isHighSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destinationIndex += writeNextCodePoint(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR.code,
-                        )
-                    }
-                    instanceHighSurrogate = currentChar
-                }
-                currentChar.isLowSurrogate() -> {
-                    if (highSurrogate != null) {
-                        destinationIndex += writeNextCodePoint(
-                            destination, destinationIndex,
-                            codePoint(highSurrogate, currentChar),
-                        )
-                        instanceHighSurrogate = null
-                    } else {
-                        destinationIndex += writeNextCodePoint(
-                            destination, destinationIndex,
-                            REPLACEMENT_CHAR.code,
-                        )
-                    }
-                }
-                else -> {
-                    throw IllegalStateException("Internal state is irrational.")
-                }
-            }
+        val writeNextByte = { value: Byte ->
+            destination[destinationIndex++] = value
         }
+
+        for (char in subSource)
+            inputChar(char, writeNextByte)
 
         return destinationIndex - destinationOffset
     }
 
-    protected abstract fun writeNextCodePoint(
-        destination: ByteArray,
-        offset: Int,
-        value: Int,
-    ): Int
+    public fun inputChar(value: Char, callback: (Byte) -> Unit): Unit {
+
+        val highSurrogate = instanceHighSurrogate
+        val valueInt = value.code
+
+        when {
+            !value.isSurrogate() -> {
+                if (highSurrogate != -1) {
+                    inputCodePoint(REPLACEMENT_CHAR.code, callback)
+                    instanceHighSurrogate = -1
+                }
+                inputCodePoint(valueInt, callback)
+            }
+            value.isHighSurrogate() -> {
+                if (highSurrogate != -1)
+                    inputCodePoint(REPLACEMENT_CHAR.code, callback)
+                instanceHighSurrogate = valueInt
+            }
+            value.isLowSurrogate() -> {
+                if (highSurrogate != -1) {
+                    inputCodePoint(codePoint(highSurrogate, valueInt), callback)
+                    instanceHighSurrogate = -1
+                } else {
+                    inputCodePoint(REPLACEMENT_CHAR.code, callback)
+                }
+            }
+            else -> {
+                throw IllegalStateException("Internal state is irrational.")
+            }
+        }
+    }
+
+    protected abstract fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit
 
     public fun reset(): Unit {
+        instanceHighSurrogate = -1
         resetState()
     }
 

@@ -18,17 +18,10 @@ package org.unikode
 
 public class Utf32BeEncoder : Utf32Encoder() {
 
-    protected override fun writeNextCodePoint(
-        destination: ByteArray,
-        offset: Int,
-        value: Int,
-    ): Int {
-
-        destination[offset] = 0x0
-        destination[offset + 1] = (value and 0xFF0000 ushr 16).toByte()
-        destination[offset + 2] = (value and 0xFF00 ushr 8).toByte()
-        destination[offset + 3] = (value and 0xFF).toByte()
-
-        return 4
+    protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit {
+        callback(0x0)
+        callback((value and 0xFF0000 ushr 16).toByte())
+        callback((value and 0xFF00 ushr 8).toByte())
+        callback((value and 0xFF).toByte())
     }
 }
