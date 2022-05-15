@@ -1,0 +1,171 @@
+/*
+ * Any copyright is dedicated to the Public Domain.
+ *
+ * Copyright 2022 William Swartzendruber
+ *
+ * SPDX-License-Identifier: CC0-1.0
+ */
+
+package org.unikode.test
+
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+
+import org.unikode.Encoder
+
+class EncoderTests {
+
+    @Test
+    fun nothing() {
+        assertTrue(TestEncoder() codePointsEqual intArrayOf())
+    }
+
+    @Test
+    fun single_char() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(' ', callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x20))
+    }
+
+    @Test
+    fun two_single_chars() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(0x20.toChar(), callback)
+        encoder.inputChar(0x40.toChar(), callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x20, 0x40))
+    }
+
+    @Test
+    fun surrogate_pair() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(0xD83D.toChar(), callback)
+        encoder.inputChar(0xDE00.toChar(), callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x1F600))
+    }
+
+    @Test
+    fun low_surrogate() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(0xDE00.toChar(), callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0xFFFD))
+    }
+
+    @Test
+    fun high_surrogate_single_char() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(0xD83D.toChar(), callback)
+        encoder.inputChar(0x20.toChar(), callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0xFFFD, 0x20))
+    }
+
+    @Test
+    fun high_surrogate_surrogate_pair() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(0xD83C.toChar(), callback)
+        encoder.inputChar(0xD83D.toChar(), callback)
+        encoder.inputChar(0xDE00.toChar(), callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0xFFFD, 0x1F600))
+    }
+
+    @Test
+    fun char_sequence_full() {
+
+        val input = "Hello"
+        val output = byteArrayOf()
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+    }
+
+    @Test
+    fun char_sequence_slice() {
+
+        val input = "Hello"
+        val output = byteArrayOf()
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output, 1, 4)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x65, 0x6C, 0x6C))
+    }
+
+    @Test
+    fun char_array_full() {
+
+        val input = charArrayOf('H', 'e', 'l', 'l', 'o')
+        val output = byteArrayOf()
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+    }
+
+    @Test
+    fun char_array_slice() {
+
+        val input = charArrayOf('H', 'e', 'l', 'l', 'o')
+        val output = byteArrayOf()
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output, 1, 4)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x65, 0x6C, 0x6C))
+    }
+
+    @Test
+    fun char_iterable() {
+
+        val input = listOf<Char>('H', 'e', 'l', 'l', 'o')
+        val output = byteArrayOf()
+        val encoder = TestEncoder()
+
+        encoder.encode(input, output)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+    }
+
+    class TestEncoder : Encoder() {
+
+        val codePoints = mutableListOf<Int>()
+
+        override fun maxBytesNeeded(charCount: Int) = charCount
+
+        override fun maxCharsPossible(byteCount: Int) = byteCount
+
+        protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit) {
+            codePoints.add(value)
+        }
+
+        infix fun codePointsEqual(other: IntArray) =
+            codePoints.toIntArray() contentEquals other
+    }
+}

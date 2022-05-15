@@ -51,6 +51,50 @@ public abstract class Encoder {
         return destinationIndex - destinationOffset
     }
 
+    public fun encode(
+        source: CharArray,
+        destination: ByteArray,
+        sourceStartIndex: Int = 0,
+        sourceEndIndex: Int = source.size,
+        destinationOffset: Int = 0,
+    ): Int {
+
+        require(sourceStartIndex >= 0 && sourceStartIndex <= sourceEndIndex) {
+            "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
+        }
+        require(sourceEndIndex <= source.size) {
+            "sourceEndIndex exceeds the number of characters in the source."
+        }
+
+        val subSource = source.slice(sourceStartIndex until sourceEndIndex)
+        var destinationIndex = destinationOffset
+        val writeNextByte = { value: Byte ->
+            destination[destinationIndex++] = value
+        }
+
+        for (char in subSource)
+            inputChar(char, writeNextByte)
+
+        return destinationIndex - destinationOffset
+    }
+
+    public fun encode(
+        source: Iterable<Char>,
+        destination: ByteArray,
+        destinationOffset: Int = 0,
+    ): Int {
+
+        var destinationIndex = destinationOffset
+        val writeNextByte = { value: Byte ->
+            destination[destinationIndex++] = value
+        }
+
+        for (char in source)
+            inputChar(char, writeNextByte)
+
+        return destinationIndex - destinationOffset
+    }
+
     public fun inputChar(value: Char, callback: (Byte) -> Unit): Unit {
 
         val highSurrogate = instanceHighSurrogate
