@@ -16,10 +16,13 @@
 
 package org.unikode
 
-public fun ByteArray.toStringUtf8(): String {
+public fun ByteArray.toStringUtf8(): String = this.toString(Utf8Decoder())
+
+public fun Iterable<Byte>.toStringUtf8(): String = this.toString(Utf8Decoder())
+
+private fun ByteArray.toString(decoder: Decoder): String {
 
     val builder = StringBuilder()
-    val decoder = Utf8Decoder()
     val writeNextChar: (Char) -> Unit = { value: Char ->
         builder.append(value)
     }
@@ -30,10 +33,9 @@ public fun ByteArray.toStringUtf8(): String {
     return builder.toString()
 }
 
-public fun Iterable<Byte>.toStringUtf8(): String {
+private fun Iterable<Byte>.toString(decoder: Decoder): String {
 
     val builder = StringBuilder()
-    val decoder = Utf8Decoder()
     val writeNextChar: (Char) -> Unit = { value: Char ->
         builder.append(value)
     }

@@ -16,10 +16,15 @@
 
 package org.unikode
 
-public fun CharSequence.toUtf8ByteArray(): ByteArray {
+public fun CharSequence.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
+
+public fun CharArray.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
+
+public fun Iterable<Char>.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
+
+private fun CharSequence.toByteArray(encoder: Encoder): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val encoder = Utf8Encoder()
     val writeNextByte: (Byte) -> Unit = { value: Byte ->
         bytes.add(value)
     }
@@ -30,10 +35,9 @@ public fun CharSequence.toUtf8ByteArray(): ByteArray {
     return bytes.toByteArray()
 }
 
-public fun CharArray.toUtf8ByteArray(): ByteArray {
+private fun CharArray.toByteArray(encoder: Encoder): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val encoder = Utf8Encoder()
     val writeNextByte: (Byte) -> Unit = { value: Byte ->
         bytes.add(value)
     }
@@ -44,10 +48,9 @@ public fun CharArray.toUtf8ByteArray(): ByteArray {
     return bytes.toByteArray()
 }
 
-public fun Iterable<Char>.toUtf8ByteArray(): ByteArray {
+private fun Iterable<Char>.toByteArray(encoder: Encoder): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val encoder = Utf8Encoder()
     val writeNextByte: (Byte) -> Unit = { value: Byte ->
         bytes.add(value)
     }
