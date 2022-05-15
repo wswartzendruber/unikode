@@ -27,7 +27,7 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxBytesPossbile(charCount: Int): Int = charCount
 
-    public override fun inputByte(value: Byte, callback: (Int) -> Unit): Unit {
+    protected override fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val valueInt = value.toInt()
 
@@ -88,7 +88,7 @@ public class Utf8Decoder : Decoder() {
             } else {
                 reset()
                 callback(REPLACEMENT_CHAR.code)
-                inputByte(value, callback)
+                inputNextByte(value, callback)
             }
         }
     }

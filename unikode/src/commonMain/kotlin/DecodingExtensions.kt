@@ -16,4 +16,30 @@
 
 package org.unikode
 
-public const val REPLACEMENT_CHAR: Char = '�'
+public fun ByteArray.toStringUtf8(): String {
+
+    val builder = StringBuilder()
+    val decoder = Utf8Decoder()
+    val writeNextChar: (Char) -> Unit = { value: Char ->
+        builder.append(value)
+    }
+
+    for (byte in this)
+        decoder.inputByte(byte, writeNextChar)
+
+    return builder.toString()
+}
+
+public fun Iterable<Byte>.toStringUtf8(): String {
+
+    val builder = StringBuilder()
+    val decoder = Utf8Decoder()
+    val writeNextChar: (Char) -> Unit = { value: Char ->
+        builder.append(value)
+    }
+
+    for (byte in this)
+        decoder.inputByte(byte, writeNextChar)
+
+    return builder.toString()
+}

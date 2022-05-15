@@ -39,28 +39,54 @@ public abstract class Decoder {
 
         var sourceIndex = sourceStartIndex
         var destinationIndex = destinationOffset
-        val writeNextCodePoint = { value: Int ->
-            when (value) {
-                in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
-                    destination[destinationIndex++] = value.toChar()
-                }
-                in 0x010000..0x10FFFF -> {
-                    destination[destinationIndex++] = value.highSurrogate()
-                    destination[destinationIndex++] = value.lowSurrogate()
-                }
-                else -> {
-                    destination[destinationIndex++] = REPLACEMENT_CHAR
-                }
-            }
+        val writeNextChar = { value: Char ->
+            destination[destinationIndex++] = value
         }
 
         while (sourceIndex < sourceEndIndex)
-            inputByte(source[sourceIndex++], writeNextCodePoint)
+            inputByte(source[sourceIndex++], writeNextChar)
 
         return destinationIndex - destinationOffset
     }
 
-    public abstract fun inputByte(value: Byte, callback: (Int) -> Unit): Unit
+    public fun decode(
+        source: Iterable<Byte>,
+        destination: CharArray,
+        destinationOffset: Int = 0,
+    ): Int {
+
+        var destinationIndex = destinationOffset
+        val writeNextChar = { value: Char ->
+            destination[destinationIndex++] = value
+        }
+
+        for (byte in source)
+            inputByte(byte, writeNextChar)
+
+        return destinationIndex - destinationOffset
+    }
+
+    public fun inputByte(value: Byte, callback: (Char) -> Unit): Unit {
+
+        val writeChars = { valueInt: Int ->
+            when (valueInt) {
+                in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
+                    callback(valueInt.toChar())
+                }
+                in 0x010000..0x10FFFF -> {
+                    callback(valueInt.highSurrogate())
+                    callback(valueInt.lowSurrogate())
+                }
+                else -> {
+                    callback(REPLACEMENT_CHAR)
+                }
+            }
+        }
+
+        inputNextByte(value, writeChars)
+    }
+
+    protected abstract fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit
 
     public abstract fun reset(): Unit
 }
