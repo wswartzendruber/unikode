@@ -94,6 +94,19 @@ class EncoderTests {
     }
 
     @Test
+    fun high_surrogate_reset_single_char() {
+
+        val callback = { _: Byte -> }
+        val encoder = TestEncoder()
+
+        encoder.inputChar(0xD83D.toChar(), callback)
+        encoder.reset()
+        encoder.inputChar(' ', callback)
+
+        assertTrue(encoder codePointsEqual intArrayOf(0x20))
+    }
+
+    @Test
     fun char_sequence_full() {
 
         val input = "Hello"
