@@ -22,6 +22,30 @@ public fun CharArray.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder
 
 public fun Iterable<Char>.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
 
+public fun CharSequence.toUtf16BeByteArray(): ByteArray = this.toByteArray(Utf16BeEncoder())
+
+public fun CharArray.toUtf16BeByteArray(): ByteArray = this.toByteArray(Utf16BeEncoder())
+
+public fun Iterable<Char>.toUtf16BeByteArray(): ByteArray = this.toByteArray(Utf16BeEncoder())
+
+public fun CharSequence.toUtf16LeByteArray(): ByteArray = this.toByteArray(Utf16LeEncoder())
+
+public fun CharArray.toUtf16LeByteArray(): ByteArray = this.toByteArray(Utf16LeEncoder())
+
+public fun Iterable<Char>.toUtf16LeByteArray(): ByteArray = this.toByteArray(Utf16LeEncoder())
+
+public fun CharSequence.toUtf32BeByteArray(): ByteArray = this.toByteArray(Utf32BeEncoder())
+
+public fun CharArray.toUtf32BeByteArray(): ByteArray = this.toByteArray(Utf32BeEncoder())
+
+public fun Iterable<Char>.toUtf32BeByteArray(): ByteArray = this.toByteArray(Utf32BeEncoder())
+
+public fun CharSequence.toUtf32LeByteArray(): ByteArray = this.toByteArray(Utf32LeEncoder())
+
+public fun CharArray.toUtf32LeByteArray(): ByteArray = this.toByteArray(Utf32LeEncoder())
+
+public fun Iterable<Char>.toUtf32LeByteArray(): ByteArray = this.toByteArray(Utf32LeEncoder())
+
 private fun CharSequence.toByteArray(encoder: Encoder): ByteArray {
 
     val bytes = mutableListOf<Byte>()
