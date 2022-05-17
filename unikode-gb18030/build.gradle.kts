@@ -73,6 +73,7 @@ kotlin {
 dependencies {
     // Common
     commonMainImplementation(platform(kotlin("bom")))
+    commonMainImplementation(project(":unikode"))
     commonTestImplementation(kotlin("test"))
 }
 
@@ -86,8 +87,8 @@ publishing {
         create<MavenPublication>("maven") {
             artifact(tasks["dokkaHtmlJar"])
             pom {
-                name.set("Unikode")
-                description.set("Unicode processing library for Kotlin Multiplatform")
+                name.set("Unikode (GB 18030 Extensions)")
+                description.set("GB 18030 Support for Unikode")
                 url.set("https://github.com/wswartzendruber/unikode")
                 developers {
                     developer {
