@@ -19,6 +19,4 @@ package org.unikode
 public abstract class Utf32Encoder : Encoder() {
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
-
-    public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
 }

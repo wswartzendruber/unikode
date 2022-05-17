@@ -25,8 +25,6 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    public override fun maxBytesPossbile(charCount: Int): Int = charCount
-
     protected override fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val valueInt = value.toInt()

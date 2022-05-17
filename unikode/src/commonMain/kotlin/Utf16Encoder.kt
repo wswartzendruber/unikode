@@ -20,8 +20,6 @@ public abstract class Utf16Encoder : Encoder() {
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 2
 
-    public override fun maxCharsPossible(byteCount: Int): Int = byteCount / 2
-
     protected fun Int.highSurrogate(): Int = ((this - 0x10000) ushr 10) + 0xD800
 
     protected fun Int.lowSurrogate(): Int = ((this - 0x10000) and 0x3FF) + 0xDC00

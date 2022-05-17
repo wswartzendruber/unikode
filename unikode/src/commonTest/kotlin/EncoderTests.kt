@@ -208,8 +208,6 @@ class EncoderTests {
 
         override fun maxBytesNeeded(charCount: Int) = charCount
 
-        override fun maxCharsPossible(byteCount: Int) = byteCount
-
         protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit) {
             callback(0x01)
             codePoints.add(value)
