@@ -20,6 +20,22 @@ public fun ByteArray.toStringUtf8(): String = this.toString(Utf8Decoder())
 
 public fun Iterable<Byte>.toStringUtf8(): String = this.toString(Utf8Decoder())
 
+public fun ByteArray.toStringUtf16Be(): String = this.toString(Utf16BeDecoder())
+
+public fun Iterable<Byte>.toStringUtf16Be(): String = this.toString(Utf16BeDecoder())
+
+public fun ByteArray.toStringUtf16Le(): String = this.toString(Utf16LeDecoder())
+
+public fun Iterable<Byte>.toStringUtf16Le(): String = this.toString(Utf16LeDecoder())
+
+public fun ByteArray.toStringUtf32Be(): String = this.toString(Utf32BeDecoder())
+
+public fun Iterable<Byte>.toStringUtf32Be(): String = this.toString(Utf32BeDecoder())
+
+public fun ByteArray.toStringUtf32Le(): String = this.toString(Utf32LeDecoder())
+
+public fun Iterable<Byte>.toStringUtf32Le(): String = this.toString(Utf32LeDecoder())
+
 private fun ByteArray.toString(decoder: Decoder): String {
 
     val builder = StringBuilder()
