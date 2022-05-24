@@ -18,7 +18,7 @@ package org.unikode
 
 public class Utf16BeEncoder : Utf16Encoder() {
 
-    protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit =
+    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
         if (value <= 0xFFFF) {
             callback((value ushr 8).toByte())
             callback((value and 0xFF).toByte())

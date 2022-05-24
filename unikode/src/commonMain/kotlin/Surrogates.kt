@@ -16,10 +16,10 @@
 
 package org.unikode
 
-public fun codePoint(highSurrogate: Char, lowSurrogate: Char): Int =
-    codePoint(highSurrogate.code, lowSurrogate.code)
+public fun scalarValue(highSurrogate: Char, lowSurrogate: Char): Int =
+    scalarValue(highSurrogate.code, lowSurrogate.code)
 
-public fun codePoint(highSurrogate: Int, lowSurrogate: Int): Int =
+public fun scalarValue(highSurrogate: Int, lowSurrogate: Int): Int =
     (((highSurrogate - 0xD800) shl 10) or (lowSurrogate - 0xDC00)) + 0x10000
 
 public fun Int.highSurrogate(): Char = (((this - 0x10000) ushr 10) + 0xD800).toChar()

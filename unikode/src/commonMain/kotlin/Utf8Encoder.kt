@@ -20,7 +20,7 @@ public class Utf8Encoder : Encoder() {
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
-    protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit =
+    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
         when (value) {
             in 0x00..0x7F -> {
                 callback(value.toByte())

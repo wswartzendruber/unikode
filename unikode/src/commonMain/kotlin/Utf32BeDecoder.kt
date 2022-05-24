@@ -18,7 +18,7 @@ package org.unikode
 
 public class Utf32BeDecoder : Utf32Decoder() {
 
-    protected override fun currentBytesToCodePoint(): Int =
+    protected override fun currentBytesToScalarValue(): Int =
         (currentBytes[0] shl 24) or
         (currentBytes[1] shl 16) or
         (currentBytes[2] shl 8) or

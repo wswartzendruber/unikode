@@ -19,7 +19,7 @@ class EncoderTests {
 
     @Test
     fun nothing() {
-        assertTrue(TestEncoder() codePointsEqual intArrayOf())
+        assertTrue(TestEncoder() scalarValuesEqual intArrayOf())
     }
 
     @Test
@@ -30,7 +30,7 @@ class EncoderTests {
 
         encoder.inputChar(' ', callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x20))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x20))
     }
 
     @Test
@@ -42,7 +42,7 @@ class EncoderTests {
         encoder.inputChar(0x20.toChar(), callback)
         encoder.inputChar(0x40.toChar(), callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x20, 0x40))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x20, 0x40))
     }
 
     @Test
@@ -54,7 +54,7 @@ class EncoderTests {
         encoder.inputChar(0xD83D.toChar(), callback)
         encoder.inputChar(0xDE00.toChar(), callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x1F600))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x1F600))
     }
 
     @Test
@@ -65,7 +65,7 @@ class EncoderTests {
 
         encoder.inputChar(0xDE00.toChar(), callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0xFFFD))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0xFFFD))
     }
 
     @Test
@@ -77,7 +77,7 @@ class EncoderTests {
         encoder.inputChar(0xD83D.toChar(), callback)
         encoder.inputChar(0x20.toChar(), callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0xFFFD, 0x20))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0xFFFD, 0x20))
     }
 
     @Test
@@ -90,7 +90,7 @@ class EncoderTests {
         encoder.inputChar(0xD83D.toChar(), callback)
         encoder.inputChar(0xDE00.toChar(), callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0xFFFD, 0x1F600))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0xFFFD, 0x1F600))
     }
 
     @Test
@@ -103,7 +103,7 @@ class EncoderTests {
         encoder.reset()
         encoder.inputChar(' ', callback)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x20))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x20))
     }
 
     @Test
@@ -115,7 +115,7 @@ class EncoderTests {
 
         encoder.encode(input, output)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
     }
 
     @Test
@@ -127,7 +127,7 @@ class EncoderTests {
 
         encoder.encode(input, output, 1, 4)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x65, 0x6C, 0x6C))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x65, 0x6C, 0x6C))
     }
 
     @Test
@@ -151,7 +151,7 @@ class EncoderTests {
 
         encoder.encode(input, output)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
     }
 
     @Test
@@ -163,7 +163,7 @@ class EncoderTests {
 
         encoder.encode(input, output, 1, 4)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x65, 0x6C, 0x6C))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x65, 0x6C, 0x6C))
     }
 
     @Test
@@ -187,7 +187,7 @@ class EncoderTests {
 
         encoder.encode(input, output)
 
-        assertTrue(encoder codePointsEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
+        assertTrue(encoder scalarValuesEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
     }
 
     @Test
@@ -204,16 +204,16 @@ class EncoderTests {
 
     class TestEncoder : Encoder() {
 
-        val codePoints = mutableListOf<Int>()
+        val scalarValues = mutableListOf<Int>()
 
         override fun maxBytesNeeded(charCount: Int) = charCount
 
-        protected override fun inputCodePoint(value: Int, callback: (Byte) -> Unit) {
+        protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit) {
             callback(0x01)
-            codePoints.add(value)
+            scalarValues.add(value)
         }
 
-        infix fun codePointsEqual(other: IntArray) =
-            codePoints.toIntArray() contentEquals other
+        infix fun scalarValuesEqual(other: IntArray) =
+            scalarValues.toIntArray() contentEquals other
     }
 }

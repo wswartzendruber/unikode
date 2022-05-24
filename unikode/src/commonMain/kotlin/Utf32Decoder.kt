@@ -27,7 +27,7 @@ public abstract class Utf32Decoder : Decoder() {
     protected override fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit {
         currentBytes[currentByteCount++] = value.toInt() and 0xFF
         if (currentByteCount == 4) {
-            callback(currentBytesToCodePoint())
+            callback(currentBytesToScalarValue())
             currentByteCount = 0
         }
     }
@@ -40,5 +40,5 @@ public abstract class Utf32Decoder : Decoder() {
         currentByteCount = 0
     }
 
-    protected abstract fun currentBytesToCodePoint(): Int
+    protected abstract fun currentBytesToScalarValue(): Int
 }

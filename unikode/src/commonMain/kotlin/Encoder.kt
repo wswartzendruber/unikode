@@ -101,22 +101,22 @@ public abstract class Encoder {
         when {
             !value.isSurrogate() -> {
                 if (highSurrogate != -1) {
-                    inputCodePoint(REPLACEMENT_CHAR.code, callback)
+                    inputScalarValue(REPLACEMENT_CHAR.code, callback)
                     instanceHighSurrogate = -1
                 }
-                inputCodePoint(valueInt, callback)
+                inputScalarValue(valueInt, callback)
             }
             value.isHighSurrogate() -> {
                 if (highSurrogate != -1)
-                    inputCodePoint(REPLACEMENT_CHAR.code, callback)
+                    inputScalarValue(REPLACEMENT_CHAR.code, callback)
                 instanceHighSurrogate = valueInt
             }
             value.isLowSurrogate() -> {
                 if (highSurrogate != -1) {
-                    inputCodePoint(codePoint(highSurrogate, valueInt), callback)
+                    inputScalarValue(scalarValue(highSurrogate, valueInt), callback)
                     instanceHighSurrogate = -1
                 } else {
-                    inputCodePoint(REPLACEMENT_CHAR.code, callback)
+                    inputScalarValue(REPLACEMENT_CHAR.code, callback)
                 }
             }
             else -> {
@@ -125,7 +125,7 @@ public abstract class Encoder {
         }
     }
 
-    protected abstract fun inputCodePoint(value: Int, callback: (Byte) -> Unit): Unit
+    protected abstract fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit
 
     public fun reset(): Unit {
         instanceHighSurrogate = -1

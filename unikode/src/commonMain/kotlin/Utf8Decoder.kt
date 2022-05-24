@@ -60,7 +60,7 @@ public class Utf8Decoder : Decoder() {
             if (valueInt and 0xC0 == 0x80) {
                 currentBytes[currentByteCount++] = valueInt
                 if (currentByteCount == currentBytesExpected) {
-                    val codePoint = when (currentBytesExpected) {
+                    val scalarValue = when (currentBytesExpected) {
                         2 -> {
                             (currentBytes[0] and 0x1F shl 6) or
                                 (currentBytes[1] and 0x3F)
@@ -81,7 +81,7 @@ public class Utf8Decoder : Decoder() {
                         }
                     }
                     reset()
-                    callback(codePoint)
+                    callback(scalarValue)
                 }
             } else {
                 reset()
