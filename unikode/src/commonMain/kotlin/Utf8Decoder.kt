@@ -19,7 +19,7 @@ package org.unikode
 public class Utf8Decoder : Decoder() {
 
     private var continuing = false
-    private val currentBytes = IntArray(4)
+    private val currentBytes = IntArray(6)
     private var currentBytesExpected = 0
     private var currentByteCount = 0
 
@@ -52,6 +52,16 @@ public class Utf8Decoder : Decoder() {
                     currentBytesExpected = 4
                     currentByteCount = 1
                 }
+                valueInt and 0xFC == 0xF8 -> {
+                    continuing = true
+                    currentBytesExpected = 5
+                    currentByteCount = 1
+                }
+                valueInt and 0xFE == 0xFC -> {
+                    continuing = true
+                    currentBytesExpected = 6
+                    currentByteCount = 1
+                }
                 else -> {
                     callback(REPLACEMENT_CHAR.code)
                 }
@@ -76,6 +86,9 @@ public class Utf8Decoder : Decoder() {
                                 (currentBytes[2] and 0x3F shl 6) or
                                 (currentBytes[3] and 0x3F)
                         }
+                        5, 6 -> {
+                            REPLACEMENT_CHAR.code
+                        }
                         else -> {
                             throw IllegalStateException("Internal state is irrational.")
                         }
@@ -97,6 +110,8 @@ public class Utf8Decoder : Decoder() {
         currentBytes[1] = 0x00
         currentBytes[2] = 0x00
         currentBytes[3] = 0x00
+        currentBytes[4] = 0x00
+        currentBytes[5] = 0x00
         currentBytesExpected = 0
         currentByteCount = 0
     }
