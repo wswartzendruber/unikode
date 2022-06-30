@@ -10,5 +10,4 @@ rootProject.name = "unikode"
 
 include(
     "unikode",
-    "unikode-gb18030",
 )
