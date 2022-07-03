@@ -72,19 +72,31 @@ public class Utf8Decoder : Decoder() {
                 if (currentByteCount == currentBytesExpected) {
                     val scalarValue = when (currentBytesExpected) {
                         2 -> {
-                            (currentBytes[0] and 0x1F shl 6) or
+                            val temp = (currentBytes[0] and 0x1F shl 6) or
                                 (currentBytes[1] and 0x3F)
+                            if (temp in 0x080..0x7FF)
+                                temp
+                            else
+                                REPLACEMENT_CHAR.code
                         }
                         3 -> {
-                            (currentBytes[0] and 0x0F shl 12) or
+                            val temp = (currentBytes[0] and 0x0F shl 12) or
                                 (currentBytes[1] and 0x3F shl 6) or
                                 (currentBytes[2] and 0x3F)
+                            if (temp in 0x0800..0xFFFF)
+                                temp
+                            else
+                                REPLACEMENT_CHAR.code
                         }
                         4 -> {
-                            (currentBytes[0] and 0x07 shl 18) or
+                            val temp = (currentBytes[0] and 0x07 shl 18) or
                                 (currentBytes[1] and 0x3F shl 12) or
                                 (currentBytes[2] and 0x3F shl 6) or
                                 (currentBytes[3] and 0x3F)
+                            if (temp in 0x010000..0x10FFFF)
+                                temp
+                            else
+                                REPLACEMENT_CHAR.code
                         }
                         5, 6 -> {
                             REPLACEMENT_CHAR.code
