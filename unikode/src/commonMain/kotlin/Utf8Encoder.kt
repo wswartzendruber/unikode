@@ -18,23 +18,28 @@ package org.unikode
 
 public class Utf8Encoder : Encoder() {
 
+    private val oneByteRange = 0x00..0x7F
+    private val twoByteRange = 0x080..0x7FF
+    private val threeByteRange = 0x0800..0xFFFF
+    private val fourByteRange = 0x010000..0x10FFFF
+
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
     protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
         when (value) {
-            in 0x00..0x7F -> {
+            in oneByteRange -> {
                 callback(value.toByte())
             }
-            in 0x080..0x7FF -> {
+            in twoByteRange -> {
                 callback((0xC0 or (value ushr 6)).toByte())
                 callback((0x80 or (value and 0x3F)).toByte())
             }
-            in 0x0800..0xFFFF -> {
+            in threeByteRange -> {
                 callback((0xE0 or (value ushr 12)).toByte())
                 callback((0x80 or (value ushr 6 and 0x3F)).toByte())
                 callback((0x80 or (value and 0x3F)).toByte())
             }
-            in 0x010000..0x10FFFF -> {
+            in fourByteRange -> {
                 callback((0xF0 or (value ushr 18)).toByte())
                 callback((0x80 or (value ushr 12 and 0x3F)).toByte())
                 callback((0x80 or (value ushr 6 and 0x3F)).toByte())
