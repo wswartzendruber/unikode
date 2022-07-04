@@ -68,10 +68,10 @@ public abstract class Decoder {
 
         val writeChars = { valueInt: Int ->
             when (valueInt) {
-                in 0x0000..0xD7FF, in 0xE000..0xFFFF -> {
+                in bmpRange1, in bmpRange2 -> {
                     callback(valueInt.toChar())
                 }
-                in 0x010000..0x10FFFF -> {
+                in extRange -> {
                     callback(valueInt.highSurrogate())
                     callback(valueInt.lowSurrogate())
                 }
@@ -87,4 +87,11 @@ public abstract class Decoder {
     protected abstract fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit
 
     public abstract fun reset(): Unit
+
+    private companion object {
+
+        private val bmpRange1 = 0x0000..0xD7FF
+        private val bmpRange2 = 0xE000..0xFFFF
+        private val extRange = 0x010000..0x10FFFF
+    }
 }

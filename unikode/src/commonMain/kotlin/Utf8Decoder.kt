@@ -22,9 +22,6 @@ public class Utf8Decoder : Decoder() {
     private val currentBytes = IntArray(6)
     private var currentBytesExpected = 0
     private var currentByteCount = 0
-    private val twoByteRange = 0x080..0x7FF
-    private val threeByteRange = 0x0800..0xFFFF
-    private val fourByteRange = 0x010000..0x10FFFF
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
@@ -129,5 +126,12 @@ public class Utf8Decoder : Decoder() {
         currentBytes[5] = 0x00
         currentBytesExpected = 0
         currentByteCount = 0
+    }
+
+    private companion object {
+
+        private val twoByteRange = 0x080..0x7FF
+        private val threeByteRange = 0x0800..0xFFFF
+        private val fourByteRange = 0x010000..0x10FFFF
     }
 }

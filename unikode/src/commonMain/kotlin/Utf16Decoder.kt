@@ -78,10 +78,14 @@ public abstract class Utf16Decoder : Decoder() {
 
     protected companion object {
 
-        protected fun Int.isSurrogate(): Boolean = this in 0xD800..0xDFFF
+        private val surrogateRange = 0xD800..0xDFFF
+        private val highSurrogateRange = 0xD800..0xDBFF
+        private val lowSurrogateRange = 0xDC00..0xDFFF
 
-        protected fun Int.isHighSurrogate(): Boolean = this in 0xD800..0xDBFF
+        protected fun Int.isSurrogate(): Boolean = this in surrogateRange
 
-        protected fun Int.isLowSurrogate(): Boolean = this in 0xDC00..0xDFFF
+        protected fun Int.isHighSurrogate(): Boolean = this in highSurrogateRange
+
+        protected fun Int.isLowSurrogate(): Boolean = this in lowSurrogateRange
     }
 }
