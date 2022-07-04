@@ -18,11 +18,6 @@ package org.unikode
 
 public class Utf8Encoder : Encoder() {
 
-    private val oneByteRange = 0x00..0x7F
-    private val twoByteRange = 0x080..0x7FF
-    private val threeByteRange = 0x0800..0xFFFF
-    private val fourByteRange = 0x010000..0x10FFFF
-
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
     protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
@@ -49,4 +44,12 @@ public class Utf8Encoder : Encoder() {
                 throw IllegalStateException("Got invalid value from superclass.")
             }
         }
+
+    private companion object {
+
+        private val oneByteRange = 0x00..0x7F
+        private val twoByteRange = 0x080..0x7FF
+        private val threeByteRange = 0x0800..0xFFFF
+        private val fourByteRange = 0x010000..0x10FFFF
+    }
 }
