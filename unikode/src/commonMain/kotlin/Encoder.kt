@@ -101,14 +101,14 @@ public abstract class Encoder {
         when {
             !value.isSurrogate() -> {
                 if (highSurrogate != -1) {
-                    inputScalarValue(REPLACEMENT_CHAR.code, callback)
+                    inputScalarValue(REPLACEMENT_CODE, callback)
                     instanceHighSurrogate = -1
                 }
                 inputScalarValue(valueInt, callback)
             }
             value.isHighSurrogate() -> {
                 if (highSurrogate != -1)
-                    inputScalarValue(REPLACEMENT_CHAR.code, callback)
+                    inputScalarValue(REPLACEMENT_CODE, callback)
                 instanceHighSurrogate = valueInt
             }
             value.isLowSurrogate() -> {
@@ -116,7 +116,7 @@ public abstract class Encoder {
                     inputScalarValue(scalarValue(highSurrogate, valueInt), callback)
                     instanceHighSurrogate = -1
                 } else {
-                    inputScalarValue(REPLACEMENT_CHAR.code, callback)
+                    inputScalarValue(REPLACEMENT_CODE, callback)
                 }
             }
             else -> {

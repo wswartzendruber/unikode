@@ -45,7 +45,7 @@ public abstract class Utf16Decoder : Decoder() {
                     }
                     char.isLowSurrogate() -> {
                         reset()
-                        callback(REPLACEMENT_CHAR.code)
+                        callback(REPLACEMENT_CODE)
                     }
                     else -> {
                         throw IllegalStateException("Internal state is irrational.")
@@ -63,7 +63,7 @@ public abstract class Utf16Decoder : Decoder() {
                     callback(scalarValue)
                 } else {
                     reset()
-                    callback(REPLACEMENT_CHAR.code)
+                    callback(REPLACEMENT_CODE)
                 }
             }
         }
@@ -75,17 +75,4 @@ public abstract class Utf16Decoder : Decoder() {
     }
 
     protected abstract fun bytePairToChar(high: Int, low: Int): Int
-
-    protected companion object {
-
-        private val surrogateRange = 0xD800..0xDFFF
-        private val highSurrogateRange = 0xD800..0xDBFF
-        private val lowSurrogateRange = 0xDC00..0xDFFF
-
-        protected fun Int.isSurrogate(): Boolean = this in surrogateRange
-
-        protected fun Int.isHighSurrogate(): Boolean = this in highSurrogateRange
-
-        protected fun Int.isLowSurrogate(): Boolean = this in lowSurrogateRange
-    }
 }

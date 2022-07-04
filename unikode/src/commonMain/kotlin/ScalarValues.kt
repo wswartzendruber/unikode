@@ -54,14 +54,14 @@ public class ScalarValueIterator(private val chars: Iterator<Char>) : Iterator<I
                         scalarValue(nextChar, nextNextChar)
                     } else {
                         bufferedChar = nextNextChar.code
-                        REPLACEMENT_CHAR.code
+                        REPLACEMENT_CODE
                     }
                 } else {
-                    REPLACEMENT_CHAR.code
+                    REPLACEMENT_CODE
                 }
             }
             nextChar.isLowSurrogate() -> {
-                REPLACEMENT_CHAR.code
+                REPLACEMENT_CODE
             }
             else -> {
                 throw IllegalStateException("Internal state is irrational.")

@@ -63,7 +63,7 @@ public class Utf8Decoder : Decoder() {
                     currentByteCount = 1
                 }
                 else -> {
-                    callback(REPLACEMENT_CHAR.code)
+                    callback(REPLACEMENT_CODE)
                 }
             }
         } else {
@@ -77,7 +77,7 @@ public class Utf8Decoder : Decoder() {
                             if (temp in twoByteRange)
                                 temp
                             else
-                                REPLACEMENT_CHAR.code
+                                REPLACEMENT_CODE
                         }
                         3 -> {
                             val temp = (currentBytes[0] and 0x0F shl 12) or
@@ -86,7 +86,7 @@ public class Utf8Decoder : Decoder() {
                             if (temp in threeByteRange)
                                 temp
                             else
-                                REPLACEMENT_CHAR.code
+                                REPLACEMENT_CODE
                         }
                         4 -> {
                             val temp = (currentBytes[0] and 0x07 shl 18) or
@@ -96,10 +96,10 @@ public class Utf8Decoder : Decoder() {
                             if (temp in fourByteRange)
                                 temp
                             else
-                                REPLACEMENT_CHAR.code
+                                REPLACEMENT_CODE
                         }
                         5, 6 -> {
-                            REPLACEMENT_CHAR.code
+                            REPLACEMENT_CODE
                         }
                         else -> {
                             throw IllegalStateException("Internal state is irrational.")
@@ -110,7 +110,7 @@ public class Utf8Decoder : Decoder() {
                 }
             } else {
                 reset()
-                callback(REPLACEMENT_CHAR.code)
+                callback(REPLACEMENT_CODE)
                 inputNextByte(value, callback)
             }
         }

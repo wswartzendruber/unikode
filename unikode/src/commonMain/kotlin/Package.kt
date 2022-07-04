@@ -16,4 +16,10 @@
 
 package org.unikode
 
+public const val BOM_CHAR: Char = '\uFEFF'
+
+public const val BOM_CODE: Int = 0xFEFF
+
 public const val REPLACEMENT_CHAR: Char = '�'
+
+public const val REPLACEMENT_CODE: Int = 0xFFFD
