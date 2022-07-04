@@ -94,4 +94,94 @@ class Utf8DecoderTests {
         assertEquals(TEXT.length, charIndex)
         assertTrue(TEXT.toCharArray() contentEquals testCharArray)
     }
+
+    @Test
+    fun reject_overlongs_two_bytes() {
+
+        val range = 0x00..0x7F
+        val buffer = ByteArray(2)
+        val decoder = Utf8Decoder()
+        val result = mutableListOf<Char>()
+        val callback = { char: Char ->
+            result.add(char)
+            Unit
+        }
+
+        for (value in range) {
+            two_byte_value(buffer, value)
+            decoder.inputByte(buffer[0], callback)
+            decoder.inputByte(buffer[1], callback)
+        }
+
+        assertEquals(range.count(), result.size)
+        assertTrue(result.all { char: Char -> char == '�' })
+    }
+
+    @Test
+    fun reject_overlongs_three_bytes() {
+
+        val range = 0x000..0x7FF
+        val buffer = ByteArray(3)
+        val decoder = Utf8Decoder()
+        val result = mutableListOf<Char>()
+        val callback = { char: Char ->
+            result.add(char)
+            Unit
+        }
+
+        for (value in range) {
+            three_byte_value(buffer, value)
+            decoder.inputByte(buffer[0], callback)
+            decoder.inputByte(buffer[1], callback)
+            decoder.inputByte(buffer[2], callback)
+        }
+
+        assertEquals(range.count(), result.size)
+        assertTrue(result.all { char: Char -> char == '�' })
+    }
+
+    @Test
+    fun reject_overlongs_four_bytes() {
+
+        val range = 0x0000..0xFFFF
+        val buffer = ByteArray(4)
+        val decoder = Utf8Decoder()
+        val result = mutableListOf<Char>()
+        val callback = { char: Char ->
+            result.add(char)
+            Unit
+        }
+
+        for (value in range) {
+            four_byte_value(buffer, value)
+            decoder.inputByte(buffer[0], callback)
+            decoder.inputByte(buffer[1], callback)
+            decoder.inputByte(buffer[2], callback)
+            decoder.inputByte(buffer[3], callback)
+        }
+
+        assertEquals(range.count(), result.size)
+        assertTrue(result.all { char: Char -> char == '�' })
+    }
+
+    companion object {
+
+        fun two_byte_value(destination: ByteArray, value: Int) {
+            destination[0] = (0xC0 or (value ushr 6)).toByte()
+            destination[1] = (0x80 or (value and 0x3F)).toByte()
+        }
+
+        fun three_byte_value(destination: ByteArray, value: Int) {
+            destination[0] = (0xE0 or (value ushr 12)).toByte()
+            destination[1] = (0x80 or (value ushr 6 and 0x3F)).toByte()
+            destination[2] = (0x80 or (value and 0x3F)).toByte()
+        }
+
+        fun four_byte_value(destination: ByteArray, value: Int) {
+            destination[0] = (0xF0 or (value ushr 18)).toByte()
+            destination[1] = (0x80 or (value ushr 12 and 0x3F)).toByte()
+            destination[2] = (0x80 or (value ushr 6 and 0x3F)).toByte()
+            destination[3] = (0x80 or (value and 0x3F)).toByte()
+        }
+    }
 }

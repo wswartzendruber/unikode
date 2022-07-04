@@ -22,6 +22,9 @@ public class Utf8Decoder : Decoder() {
     private val currentBytes = IntArray(6)
     private var currentBytesExpected = 0
     private var currentByteCount = 0
+    private val twoByteRange = 0x080..0x7FF
+    private val threeByteRange = 0x0800..0xFFFF
+    private val fourByteRange = 0x010000..0x10FFFF
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
@@ -74,7 +77,7 @@ public class Utf8Decoder : Decoder() {
                         2 -> {
                             val temp = (currentBytes[0] and 0x1F shl 6) or
                                 (currentBytes[1] and 0x3F)
-                            if (temp in 0x080..0x7FF)
+                            if (temp in twoByteRange)
                                 temp
                             else
                                 REPLACEMENT_CHAR.code
@@ -83,7 +86,7 @@ public class Utf8Decoder : Decoder() {
                             val temp = (currentBytes[0] and 0x0F shl 12) or
                                 (currentBytes[1] and 0x3F shl 6) or
                                 (currentBytes[2] and 0x3F)
-                            if (temp in 0x0800..0xFFFF)
+                            if (temp in threeByteRange)
                                 temp
                             else
                                 REPLACEMENT_CHAR.code
@@ -93,7 +96,7 @@ public class Utf8Decoder : Decoder() {
                                 (currentBytes[1] and 0x3F shl 12) or
                                 (currentBytes[2] and 0x3F shl 6) or
                                 (currentBytes[3] and 0x3F)
-                            if (temp in 0x010000..0x10FFFF)
+                            if (temp in fourByteRange)
                                 temp
                             else
                                 REPLACEMENT_CHAR.code
