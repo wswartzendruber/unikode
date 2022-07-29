@@ -13,6 +13,7 @@ import kotlin.test.assertTrue
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+import org.unikode.toStringUtf8
 import org.unikode.Utf8Decoder
 
 class Utf8DecoderTests {
@@ -162,6 +163,33 @@ class Utf8DecoderTests {
 
         assertEquals(range.count(), result.size)
         assertTrue(result.all { char: Char -> char == '�' })
+    }
+
+    @Test
+    fun reject_initial_continuation_byte() {
+
+        val input = byteArrayOf(-0x80)
+        val output = input.toStringUtf8()
+
+        assertEquals("�", output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_1() {
+
+        val input = byteArrayOf(-0x13, 0x20)
+        val output = input.toStringUtf8()
+
+        assertEquals("� ", output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_2() {
+
+        val input = byteArrayOf(-0x13, -0x6B, 0x20)
+        val output = input.toStringUtf8()
+
+        assertEquals("� ", output)
     }
 
     companion object {
