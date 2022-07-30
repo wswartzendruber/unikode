@@ -8,7 +8,7 @@
 
 package org.unikode.test
 
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -52,7 +52,7 @@ class RoundTripTests {
         val charsUsed = decoder.decode(testByteArray, testCharArray, 0, bytesUsed)
         val endString = testCharArray.copyOfRange(0, charsUsed).concatToString()
 
-        assertTrue(completeString == endString)
+        assertEquals(completeString, endString)
     }
 
     companion object {

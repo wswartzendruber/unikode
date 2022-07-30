@@ -58,12 +58,17 @@ public abstract class Utf16Decoder : Decoder() {
             } else {
                 val char = bytePairToChar(bufferedByte, valueInt)
                 if (char.isLowSurrogate()) {
-                    val scalarValue = scalarValue(highSurrogate, char)
+                    callback(scalarValue(instanceHighSurrogate, char))
                     reset()
-                    callback(scalarValue)
                 } else {
                     reset()
                     callback(REPLACEMENT_CODE)
+                    if (!char.isSurrogate()) {
+                        callback(char)
+                    } else {
+                        instanceHighSurrogate = char
+                        instanceBufferedByte = -1
+                    }
                 }
             }
         }

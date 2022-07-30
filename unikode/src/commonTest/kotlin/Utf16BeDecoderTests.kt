@@ -13,6 +13,7 @@ import kotlin.test.assertTrue
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+import org.unikode.toStringUtf16Be
 import org.unikode.Utf16BeDecoder
 
 class Utf16BeDecoderTests {
@@ -93,5 +94,29 @@ class Utf16BeDecoderTests {
 
         assertEquals(TEXT.length, charIndex)
         assertTrue(TEXT.toCharArray() contentEquals testCharArray)
+    }
+
+    @Test
+    fun initial_ls() {
+        assertEquals(
+            " � ",
+            byteArrayOf(0x00, 0x20, -0x22, 0x00, 0x00, 0x20).toStringUtf16Be(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_bmp() {
+        assertEquals(
+            " � ",
+            byteArrayOf(0x00, 0x20, -0x26, 0x00, 0x00, 0x20).toStringUtf16Be(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_smp() {
+        assertEquals(
+            " �😀",
+            byteArrayOf(0x00, 0x20, -0x26, 0x00, -0x28, 0x3D, -0x22, 0x00).toStringUtf16Be(),
+        )
     }
 }
