@@ -40,6 +40,10 @@ public class Cesu8Decoder : Decoder() {
         if (!continuing) {
             when {
                 valueInt and 0x80 == 0x00 -> {
+                    if (instanceHighSurrogate != -1) {
+                        reset()
+                        callback(REPLACEMENT_CODE)
+                    }
                     callback(valueInt)
                 }
                 valueInt and 0xE0 == 0xC0 -> {
@@ -137,6 +141,8 @@ public class Cesu8Decoder : Decoder() {
                     }
                 }
             } else {
+                if (instanceHighSurrogate != -1)
+                    callback(REPLACEMENT_CODE)
                 reset()
                 callback(REPLACEMENT_CODE)
                 inputNextByte(value, callback)

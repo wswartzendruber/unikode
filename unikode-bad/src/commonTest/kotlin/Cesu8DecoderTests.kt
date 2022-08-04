@@ -177,7 +177,7 @@ class Cesu8DecoderTests {
     }
 
     @Test
-    fun unfollowed_hs_then_bmp() {
+    fun unfollowed_hs_then_1_byte_valid() {
         assertEquals(
             " � ",
             byteArrayOf(0x20, -0x13, -0x58, -0x80, 0x20).toStringCesu8(),
@@ -185,10 +185,51 @@ class Cesu8DecoderTests {
     }
 
     @Test
-    fun unfollowed_hs_then_smp() {
+    fun unfollowed_hs_then_2_bytes_valid() {
+        assertEquals(
+            " �θ",
+            byteArrayOf(0x20, -0x13, -0x58, -0x80, -0x32, -0x48).toStringCesu8(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_3_bytes_valid() {
+        assertEquals(
+            " �漢",
+            byteArrayOf(0x20, -0x13, -0x58, -0x80, -0x1A, -0x44, -0x5E).toStringCesu8(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_surrogate_pair_valid() {
         assertEquals(
             " �😀",
             byteArrayOf(0x20, -0x13, -0x58, -0x80, -19, -96, -67, -19, -72, -128)
+                .toStringCesu8(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_2_bytes_invalid() {
+        assertEquals(
+            " �� ",
+            byteArrayOf(0x20, -0x13, -0x58, -0x80, -0x32, 0x20).toStringCesu8(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_3_bytes_invalid() {
+        assertEquals(
+            " �� ",
+            byteArrayOf(0x20, -0x13, -0x58, -0x80, -0x1A, -0x44, 0x20).toStringCesu8(),
+        )
+    }
+
+    @Test
+    fun unfollowed_hs_then_surrogate_pair_invalid() {
+        assertEquals(
+            " ��� ",
+            byteArrayOf(0x20, -0x13, -0x58, -0x80, -19, -96, -67, -19, -72, 0x20)
                 .toStringCesu8(),
         )
     }
