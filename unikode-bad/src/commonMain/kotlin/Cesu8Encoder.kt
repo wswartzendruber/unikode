@@ -18,7 +18,7 @@ package org.unikode.bad
 
 import org.unikode.Encoder
 
-public class Cesu8Encoder : Encoder() {
+public class Cesu8Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 

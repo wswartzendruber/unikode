@@ -16,67 +16,28 @@
 
 package org.unikode
 
-public abstract class Utf16Decoder : Decoder() {
+public abstract class Utf16Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
-    private var instanceBufferedByte: Int = -1
-    private var instanceHighSurrogate: Int = -1
+    private val surrogateChecker = SurrogateChecker(callback)
+    private var bufferedByte = -1
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
 
-    protected override fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit {
+    protected override fun inputByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val valueInt = value.toInt() and 0xFF
-        val bufferedByte = instanceBufferedByte
-        val highSurrogate = instanceHighSurrogate
 
-        if (highSurrogate == -1) {
-            if (bufferedByte == -1) {
-                instanceBufferedByte = valueInt
-            } else {
-                val char = bytePairToChar(bufferedByte, valueInt)
-                when {
-                    !char.isSurrogate() -> {
-                        reset()
-                        callback(char)
-                    }
-                    char.isHighSurrogate() -> {
-                        instanceHighSurrogate = char
-                        instanceBufferedByte = -1
-                    }
-                    char.isLowSurrogate() -> {
-                        reset()
-                        callback(REPLACEMENT_CODE)
-                    }
-                    else -> {
-                        throw IllegalStateException("Internal state is irrational.")
-                    }
-                }
-            }
+        if (bufferedByte == -1) {
+            bufferedByte = valueInt
         } else {
-            if (bufferedByte == -1) {
-                instanceBufferedByte = valueInt
-            } else {
-                val char = bytePairToChar(bufferedByte, valueInt)
-                if (char.isLowSurrogate()) {
-                    callback(scalarValue(instanceHighSurrogate, char))
-                    reset()
-                } else {
-                    reset()
-                    callback(REPLACEMENT_CODE)
-                    if (!char.isSurrogate()) {
-                        callback(char)
-                    } else {
-                        instanceHighSurrogate = char
-                        instanceBufferedByte = -1
-                    }
-                }
-            }
+            surrogateChecker.input(bytePairToChar(bufferedByte, valueInt).toChar())
+            bufferedByte = -1
         }
     }
 
     public override fun reset(): Unit {
-        instanceBufferedByte = -1
-        instanceHighSurrogate = -1
+        surrogateChecker.reset()
+        bufferedByte = -1
     }
 
     protected abstract fun bytePairToChar(high: Int, low: Int): Int

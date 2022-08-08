@@ -16,48 +16,29 @@ import kotlin.test.assertEquals
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-import org.unikode.highSurrogate
-import org.unikode.lowSurrogate
-import org.unikode.Encoder
-import org.unikode.Decoder
-import org.unikode.Utf8Encoder
-import org.unikode.Utf8Decoder
-import org.unikode.Utf16LeEncoder
-import org.unikode.Utf16LeDecoder
-import org.unikode.Utf16BeEncoder
-import org.unikode.Utf16BeDecoder
-import org.unikode.Utf32LeEncoder
-import org.unikode.Utf32LeDecoder
-import org.unikode.Utf32BeEncoder
-import org.unikode.Utf32BeDecoder
+import org.unikode.*
 
 class RoundTripTests {
 
     @Test
-    fun utf8() = cycle(Utf8Encoder(), Utf8Decoder())
+    fun utf8() =
+        assertEquals(completeString, completeString.toUtf8ByteArray().toStringUtf8())
 
     @Test
-    fun utf16le() = cycle(Utf16LeEncoder(), Utf16LeDecoder())
+    fun utf16le() =
+        assertEquals(completeString, completeString.toUtf16LeByteArray().toStringUtf16Le())
 
     @Test
-    fun utf16be() = cycle(Utf16BeEncoder(), Utf16BeDecoder())
+    fun utf16be() =
+        assertEquals(completeString, completeString.toUtf16BeByteArray().toStringUtf16Be())
 
     @Test
-    fun utf32le() = cycle(Utf32LeEncoder(), Utf32LeDecoder())
+    fun utf32le() =
+        assertEquals(completeString, completeString.toUtf32LeByteArray().toStringUtf32Le())
 
     @Test
-    fun utf32be() = cycle(Utf32BeEncoder(), Utf32BeDecoder())
-
-    fun cycle(encoder: Encoder, decoder: Decoder) {
-
-        val testByteArray = ByteArray(encoder.maxBytesNeeded(completeString.length))
-        val bytesUsed = encoder.encode(completeString, testByteArray)
-        val testCharArray = CharArray(decoder.maxCharsNeeded(bytesUsed))
-        val charsUsed = decoder.decode(testByteArray, testCharArray, 0, bytesUsed)
-        val endString = testCharArray.copyOfRange(0, charsUsed).concatToString()
-
-        assertEquals(completeString, endString)
-    }
+    fun utf32be() =
+        assertEquals(completeString, completeString.toUtf32BeByteArray().toStringUtf32Be())
 
     companion object {
 

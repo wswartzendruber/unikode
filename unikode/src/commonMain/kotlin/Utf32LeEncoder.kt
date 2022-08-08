@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class Utf32LeEncoder : Utf32Encoder() {
+public class Utf32LeEncoder(callback: (Byte) -> Unit) : Utf32Encoder(callback) {
 
     protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit {
         callback((value and 0xFF).toByte())

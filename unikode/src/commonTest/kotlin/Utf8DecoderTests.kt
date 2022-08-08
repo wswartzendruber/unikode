@@ -23,99 +23,21 @@ import org.unikode.Utf8Decoder
 class Utf8DecoderTests {
 
     @Test
-    fun decode_bytes_single_chunk() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Utf8Decoder()
-        val charCount = decoder.decode(textByteArrayUtf8, testCharArray)
-
-        assertEquals(TEXT.length, charCount)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_half_chunks() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Utf8Decoder()
-        var charIndex = 0
-
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 0, 80)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 80, 160, charIndex)
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_quarter_chunks() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Utf8Decoder()
-        var charIndex = 0
-
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 0, 40)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 40, 80, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 80, 120, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 120, 160, charIndex)
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_eighth_chunks() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Utf8Decoder()
-        var charIndex = 0
-
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 0, 20)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 20, 40, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 40, 60, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 60, 80, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 80, 100, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 100, 120, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 120, 140, charIndex)
-        charIndex += decoder.decode(textByteArrayUtf8, testCharArray, 140, 160, charIndex)
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_single_step() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Utf8Decoder()
-        var charIndex = 0
-
-        for (byteIndex in 0 until textByteArrayUtf8.size) {
-            charIndex += decoder.decode(
-                textByteArrayUtf8, testCharArray, byteIndex, byteIndex + 1, charIndex
-            )
-        }
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
     fun reject_overlongs_two_bytes() {
 
         val range = 0x00..0x7F
-        val buffer = ByteArray(2)
-        val decoder = Utf8Decoder()
         val result = mutableListOf<Char>()
         val callback = { char: Char ->
             result.add(char)
             Unit
         }
+        val decoder = Utf8Decoder(callback)
+        val buffer = ByteArray(2)
 
         for (value in range) {
             two_byte_value(buffer, value)
-            decoder.inputByte(buffer[0], callback)
-            decoder.inputByte(buffer[1], callback)
+            decoder.input(buffer[0])
+            decoder.input(buffer[1])
         }
 
         assertEquals(range.count(), result.size)
@@ -126,19 +48,19 @@ class Utf8DecoderTests {
     fun reject_overlongs_three_bytes() {
 
         val range = 0x000..0x7FF
-        val buffer = ByteArray(3)
-        val decoder = Utf8Decoder()
         val result = mutableListOf<Char>()
         val callback = { char: Char ->
             result.add(char)
             Unit
         }
+        val decoder = Utf8Decoder(callback)
+        val buffer = ByteArray(3)
 
         for (value in range) {
             three_byte_value(buffer, value)
-            decoder.inputByte(buffer[0], callback)
-            decoder.inputByte(buffer[1], callback)
-            decoder.inputByte(buffer[2], callback)
+            decoder.input(buffer[0])
+            decoder.input(buffer[1])
+            decoder.input(buffer[2])
         }
 
         assertEquals(range.count(), result.size)
@@ -149,20 +71,20 @@ class Utf8DecoderTests {
     fun reject_overlongs_four_bytes() {
 
         val range = 0x0000..0xFFFF
-        val buffer = ByteArray(4)
-        val decoder = Utf8Decoder()
         val result = mutableListOf<Char>()
         val callback = { char: Char ->
             result.add(char)
             Unit
         }
+        val decoder = Utf8Decoder(callback)
+        val buffer = ByteArray(4)
 
         for (value in range) {
             four_byte_value(buffer, value)
-            decoder.inputByte(buffer[0], callback)
-            decoder.inputByte(buffer[1], callback)
-            decoder.inputByte(buffer[2], callback)
-            decoder.inputByte(buffer[3], callback)
+            decoder.input(buffer[0])
+            decoder.input(buffer[1])
+            decoder.input(buffer[2])
+            decoder.input(buffer[3])
         }
 
         assertEquals(range.count(), result.size)

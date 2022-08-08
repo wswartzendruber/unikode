@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class Utf16LeDecoder : Utf16Decoder() {
+public class Utf16LeDecoder(callback: (Char) -> Unit) : Utf16Decoder(callback) {
 
     protected override fun bytePairToChar(high: Int, low: Int): Int = high or (low shl 8)
 }

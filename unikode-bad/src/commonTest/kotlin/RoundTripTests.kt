@@ -18,26 +18,14 @@ import kotlin.test.Test
 
 import org.unikode.highSurrogate
 import org.unikode.lowSurrogate
-import org.unikode.Encoder
-import org.unikode.Decoder
-import org.unikode.bad.Cesu8Encoder
-import org.unikode.bad.Cesu8Decoder
+import org.unikode.bad.toStringCesu8
+import org.unikode.bad.toCesu8ByteArray
 
 class RoundTripTests {
 
     @Test
-    fun cesu8() = cycle(Cesu8Encoder(), Cesu8Decoder())
-
-    fun cycle(encoder: Encoder, decoder: Decoder) {
-
-        val testByteArray = ByteArray(encoder.maxBytesNeeded(completeString.length))
-        val bytesUsed = encoder.encode(completeString, testByteArray)
-        val testCharArray = CharArray(decoder.maxCharsNeeded(bytesUsed))
-        val charsUsed = decoder.decode(testByteArray, testCharArray, 0, bytesUsed)
-        val endString = testCharArray.copyOfRange(0, charsUsed).concatToString()
-
-        assertEquals(completeString, endString)
-    }
+    fun cesu8() =
+        assertEquals(completeString, completeString.toCesu8ByteArray().toStringCesu8())
 
     companion object {
 

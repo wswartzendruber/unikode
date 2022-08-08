@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class Utf8Decoder : Decoder() {
+public class Utf8Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     private var continuing = false
     private val currentBytes = IntArray(6)
@@ -25,7 +25,7 @@ public class Utf8Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    protected override fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit {
+    protected override fun inputByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val valueInt = value.toInt()
 
@@ -111,7 +111,7 @@ public class Utf8Decoder : Decoder() {
             } else {
                 reset()
                 callback(REPLACEMENT_CODE)
-                inputNextByte(value, callback)
+                inputByte(value, callback)
             }
         }
     }

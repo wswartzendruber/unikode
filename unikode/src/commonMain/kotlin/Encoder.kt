@@ -16,119 +16,21 @@
 
 package org.unikode
 
-public abstract class Encoder {
+public abstract class Encoder(private val callback: (Byte) -> Unit) {
 
-    private var instanceHighSurrogate = -1
+    private val scalarValueCallback = { scalarValue: Int ->
+        inputScalarValue(scalarValue, callback)
+    }
+    private val surrogateComposer = SurrogateComposer(scalarValueCallback)
 
     public abstract fun maxBytesNeeded(charCount: Int): Int
 
-    public fun encode(
-        source: CharSequence,
-        destination: ByteArray,
-        sourceStartIndex: Int = 0,
-        sourceEndIndex: Int = source.length,
-        destinationOffset: Int = 0,
-    ): Int {
-
-        require(sourceStartIndex >= 0 && sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
-        }
-        require(sourceEndIndex <= source.length) {
-            "sourceEndIndex exceeds the number of characters in the source."
-        }
-
-        val subSource = source.subSequence(sourceStartIndex, sourceEndIndex)
-        var destinationIndex = destinationOffset
-        val writeNextByte = { value: Byte ->
-            destination[destinationIndex++] = value
-        }
-
-        for (char in subSource)
-            inputChar(char, writeNextByte)
-
-        return destinationIndex - destinationOffset
-    }
-
-    public fun encode(
-        source: CharArray,
-        destination: ByteArray,
-        sourceStartIndex: Int = 0,
-        sourceEndIndex: Int = source.size,
-        destinationOffset: Int = 0,
-    ): Int {
-
-        require(sourceStartIndex >= 0 && sourceStartIndex <= sourceEndIndex) {
-            "sourceStartIndex must be between zero and sourceEndIndex, inclusive."
-        }
-        require(sourceEndIndex <= source.size) {
-            "sourceEndIndex exceeds the number of characters in the source."
-        }
-
-        val subSource = source.slice(sourceStartIndex until sourceEndIndex)
-        var destinationIndex = destinationOffset
-        val writeNextByte = { value: Byte ->
-            destination[destinationIndex++] = value
-        }
-
-        for (char in subSource)
-            inputChar(char, writeNextByte)
-
-        return destinationIndex - destinationOffset
-    }
-
-    public fun encode(
-        source: Iterable<Char>,
-        destination: ByteArray,
-        destinationOffset: Int = 0,
-    ): Int {
-
-        var destinationIndex = destinationOffset
-        val writeNextByte = { value: Byte ->
-            destination[destinationIndex++] = value
-        }
-
-        for (char in source)
-            inputChar(char, writeNextByte)
-
-        return destinationIndex - destinationOffset
-    }
-
-    public fun inputChar(value: Char, callback: (Byte) -> Unit): Unit {
-
-        val highSurrogate = instanceHighSurrogate
-        val valueInt = value.code
-
-        when {
-            !value.isSurrogate() -> {
-                if (highSurrogate != -1) {
-                    inputScalarValue(REPLACEMENT_CODE, callback)
-                    instanceHighSurrogate = -1
-                }
-                inputScalarValue(valueInt, callback)
-            }
-            value.isHighSurrogate() -> {
-                if (highSurrogate != -1)
-                    inputScalarValue(REPLACEMENT_CODE, callback)
-                instanceHighSurrogate = valueInt
-            }
-            value.isLowSurrogate() -> {
-                if (highSurrogate != -1) {
-                    inputScalarValue(scalarValue(highSurrogate, valueInt), callback)
-                    instanceHighSurrogate = -1
-                } else {
-                    inputScalarValue(REPLACEMENT_CODE, callback)
-                }
-            }
-            else -> {
-                throw IllegalStateException("Internal state is irrational.")
-            }
-        }
-    }
+    public fun input(value: Char): Unit = surrogateComposer.input(value)
 
     protected abstract fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit
 
     public fun reset(): Unit {
-        instanceHighSurrogate = -1
+        surrogateComposer.reset()
         resetState()
     }
 

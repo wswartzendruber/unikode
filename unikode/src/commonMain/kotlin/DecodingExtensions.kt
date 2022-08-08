@@ -16,48 +16,67 @@
 
 package org.unikode
 
-public fun ByteArray.toStringUtf8(): String = this.toString(Utf8Decoder())
+public fun ByteArray.toStringUtf8(): String = this.asIterable().toStringUtf8()
 
-public fun Iterable<Byte>.toStringUtf8(): String = this.toString(Utf8Decoder())
+public fun ByteArray.toStringUtf16Le(): String = this.asIterable().toStringUtf16Le()
 
-public fun ByteArray.toStringUtf16Be(): String = this.toString(Utf16BeDecoder())
+public fun ByteArray.toStringUtf16Be(): String = this.asIterable().toStringUtf16Be()
 
-public fun Iterable<Byte>.toStringUtf16Be(): String = this.toString(Utf16BeDecoder())
+public fun ByteArray.toStringUtf32Le(): String = this.asIterable().toStringUtf32Le()
 
-public fun ByteArray.toStringUtf16Le(): String = this.toString(Utf16LeDecoder())
+public fun ByteArray.toStringUtf32Be(): String = this.asIterable().toStringUtf32Be()
 
-public fun Iterable<Byte>.toStringUtf16Le(): String = this.toString(Utf16LeDecoder())
-
-public fun ByteArray.toStringUtf32Be(): String = this.toString(Utf32BeDecoder())
-
-public fun Iterable<Byte>.toStringUtf32Be(): String = this.toString(Utf32BeDecoder())
-
-public fun ByteArray.toStringUtf32Le(): String = this.toString(Utf32LeDecoder())
-
-public fun Iterable<Byte>.toStringUtf32Le(): String = this.toString(Utf32LeDecoder())
-
-private fun ByteArray.toString(decoder: Decoder): String {
+public fun Iterable<Byte>.toStringUtf8(): String {
 
     val builder = StringBuilder()
-    val writeNextChar: (Char) -> Unit = { value: Char ->
-        builder.append(value)
-    }
+    val decoder = Utf8Decoder({ value: Char -> builder.append(value) })
 
     for (byte in this)
-        decoder.inputByte(byte, writeNextChar)
+        decoder.input(byte)
 
     return builder.toString()
 }
 
-private fun Iterable<Byte>.toString(decoder: Decoder): String {
+public fun Iterable<Byte>.toStringUtf16Le(): String {
 
     val builder = StringBuilder()
-    val writeNextChar: (Char) -> Unit = { value: Char ->
-        builder.append(value)
-    }
+    val decoder = Utf16LeDecoder({ value: Char -> builder.append(value) })
 
     for (byte in this)
-        decoder.inputByte(byte, writeNextChar)
+        decoder.input(byte)
+
+    return builder.toString()
+}
+
+public fun Iterable<Byte>.toStringUtf16Be(): String {
+
+    val builder = StringBuilder()
+    val decoder = Utf16BeDecoder({ value: Char -> builder.append(value) })
+
+    for (byte in this)
+        decoder.input(byte)
+
+    return builder.toString()
+}
+
+public fun Iterable<Byte>.toStringUtf32Le(): String {
+
+    val builder = StringBuilder()
+    val decoder = Utf32LeDecoder({ value: Char -> builder.append(value) })
+
+    for (byte in this)
+        decoder.input(byte)
+
+    return builder.toString()
+}
+
+public fun Iterable<Byte>.toStringUtf32Be(): String {
+
+    val builder = StringBuilder()
+    val decoder = Utf32BeDecoder({ value: Char -> builder.append(value) })
+
+    for (byte in this)
+        decoder.input(byte)
 
     return builder.toString()
 }

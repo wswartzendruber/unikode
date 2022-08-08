@@ -16,34 +16,15 @@
 
 package org.unikode.bad
 
-import org.unikode.Decoder
+public fun ByteArray.toStringCesu8(): String = this.asIterable().toStringCesu8()
 
-public fun ByteArray.toStringCesu8(): String = this.toString(Cesu8Decoder())
-
-public fun Iterable<Byte>.toStringCesu8(): String = this.toString(Cesu8Decoder())
-
-private fun ByteArray.toString(decoder: Decoder): String {
+public fun Iterable<Byte>.toStringCesu8(): String {
 
     val builder = StringBuilder()
-    val writeNextChar: (Char) -> Unit = { value: Char ->
-        builder.append(value)
-    }
+    val decoder = Cesu8Decoder({ value: Char -> builder.append(value) })
 
     for (byte in this)
-        decoder.inputByte(byte, writeNextChar)
-
-    return builder.toString()
-}
-
-private fun Iterable<Byte>.toString(decoder: Decoder): String {
-
-    val builder = StringBuilder()
-    val writeNextChar: (Char) -> Unit = { value: Char ->
-        builder.append(value)
-    }
-
-    for (byte in this)
-        decoder.inputByte(byte, writeNextChar)
+        decoder.input(byte)
 
     return builder.toString()
 }

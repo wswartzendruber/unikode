@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class Utf16BeEncoder : Utf16Encoder() {
+public class Utf16BeEncoder(callback: (Byte) -> Unit) : Utf16Encoder(callback) {
 
     protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
         if (value <= 0xFFFF) {

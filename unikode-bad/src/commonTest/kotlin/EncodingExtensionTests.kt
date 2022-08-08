@@ -21,8 +21,6 @@ class EncodingExtensionTests {
 
     @Test
     fun char_array_cesu8() {
-        println(TEXT.toList().toCharArray().toCesu8ByteArray().joinToString(", "))
-        println(textByteArrayCesu8.joinToString(", "))
         assertTrue(
             TEXT.toList().toCharArray().toCesu8ByteArray() contentEquals textByteArrayCesu8
         )

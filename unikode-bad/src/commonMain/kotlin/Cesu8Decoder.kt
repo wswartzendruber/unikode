@@ -23,7 +23,7 @@ import org.unikode.isHighSurrogate
 import org.unikode.scalarValue
 import org.unikode.Decoder
 
-public class Cesu8Decoder : Decoder() {
+public class Cesu8Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     private var continuing = false
     private val currentBytes = IntArray(6)
@@ -33,7 +33,7 @@ public class Cesu8Decoder : Decoder() {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    protected override fun inputNextByte(value: Byte, callback: (Int) -> Unit): Unit {
+    protected override fun inputByte(value: Byte, callback: (Int) -> Unit): Unit {
 
         val valueInt = value.toInt()
 
@@ -145,7 +145,7 @@ public class Cesu8Decoder : Decoder() {
                     callback(REPLACEMENT_CODE)
                 reset()
                 callback(REPLACEMENT_CODE)
-                inputNextByte(value, callback)
+                inputByte(value, callback)
             }
         }
     }

@@ -16,12 +16,26 @@
 
 package org.unikode
 
-public class Utf32BeEncoder(callback: (Byte) -> Unit) : Utf32Encoder(callback) {
+public class SurrogateDecomposer(private val callback: (Char) -> Unit) {
 
-    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit {
-        callback(0x0)
-        callback((value and 0xFF0000 ushr 16).toByte())
-        callback((value and 0xFF00 ushr 8).toByte())
-        callback((value and 0xFF).toByte())
+    public fun input(value: Int): Unit =
+        when (value) {
+            in bmpRange1, in bmpRange2 -> {
+                callback(value.toChar())
+            }
+            in extRange -> {
+                callback(value.highSurrogate())
+                callback(value.lowSurrogate())
+            }
+            else -> {
+                callback(REPLACEMENT_CHAR)
+            }
+        }
+
+    private companion object {
+
+        private val bmpRange1 = 0x0000..0xD7FF
+        private val bmpRange2 = 0xE000..0xFFFF
+        private val extRange = 0x010000..0x10FFFF
     }
 }

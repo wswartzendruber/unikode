@@ -23,99 +23,21 @@ import org.unikode.bad.Cesu8Decoder
 class Cesu8DecoderTests {
 
     @Test
-    fun decode_bytes_single_chunk() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Cesu8Decoder()
-        val charCount = decoder.decode(textByteArrayCesu8, testCharArray)
-
-        assertEquals(TEXT.length, charCount)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_half_chunks() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Cesu8Decoder()
-        var charIndex = 0
-
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 0, 80)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 80, 166, charIndex)
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_quarter_chunks() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Cesu8Decoder()
-        var charIndex = 0
-
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 0, 40)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 40, 80, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 80, 120, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 120, 166, charIndex)
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_eighth_chunks() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Cesu8Decoder()
-        var charIndex = 0
-
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 0, 20)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 20, 40, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 40, 60, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 60, 80, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 80, 100, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 100, 120, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 120, 140, charIndex)
-        charIndex += decoder.decode(textByteArrayCesu8, testCharArray, 140, 166, charIndex)
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
-    fun decode_bytes_single_step() {
-
-        val testCharArray = CharArray(TEXT.length)
-        val decoder = Cesu8Decoder()
-        var charIndex = 0
-
-        for (byteIndex in 0 until textByteArrayCesu8.size) {
-            charIndex += decoder.decode(
-                textByteArrayCesu8, testCharArray, byteIndex, byteIndex + 1, charIndex
-            )
-        }
-
-        assertEquals(TEXT.length, charIndex)
-        assertTrue(TEXT.toCharArray() contentEquals testCharArray)
-    }
-
-    @Test
     fun reject_overlongs_two_bytes() {
 
         val range = 0x00..0x7F
         val buffer = ByteArray(2)
-        val decoder = Cesu8Decoder()
         val result = mutableListOf<Char>()
         val callback = { char: Char ->
             result.add(char)
             Unit
         }
+        val decoder = Cesu8Decoder(callback)
 
         for (value in range) {
             two_byte_value(buffer, value)
-            decoder.inputByte(buffer[0], callback)
-            decoder.inputByte(buffer[1], callback)
+            decoder.input(buffer[0])
+            decoder.input(buffer[1])
         }
 
         assertEquals(range.count(), result.size)
@@ -127,18 +49,18 @@ class Cesu8DecoderTests {
 
         val range = 0x000..0x7FF
         val buffer = ByteArray(3)
-        val decoder = Cesu8Decoder()
         val result = mutableListOf<Char>()
         val callback = { char: Char ->
             result.add(char)
             Unit
         }
+        val decoder = Cesu8Decoder(callback)
 
         for (value in range) {
             three_byte_value(buffer, value)
-            decoder.inputByte(buffer[0], callback)
-            decoder.inputByte(buffer[1], callback)
-            decoder.inputByte(buffer[2], callback)
+            decoder.input(buffer[0])
+            decoder.input(buffer[1])
+            decoder.input(buffer[2])
         }
 
         assertEquals(range.count(), result.size)

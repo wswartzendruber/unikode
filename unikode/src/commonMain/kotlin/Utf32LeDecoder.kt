@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class Utf32LeDecoder : Utf32Decoder() {
+public class Utf32LeDecoder(callback: (Char) -> Unit) : Utf32Decoder(callback) {
 
     protected override fun currentBytesToScalarValue(): Int =
         currentBytes[0] or

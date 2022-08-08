@@ -18,47 +18,17 @@ package org.unikode.bad
 
 import org.unikode.Encoder
 
-public fun CharSequence.toCesu8ByteArray(): ByteArray = this.toByteArray(Cesu8Encoder())
+public fun CharSequence.toCesu8ByteArray(): ByteArray = this.asIterable().toCesu8ByteArray()
 
-public fun CharArray.toCesu8ByteArray(): ByteArray = this.toByteArray(Cesu8Encoder())
+public fun CharArray.toCesu8ByteArray(): ByteArray = this.asIterable().toCesu8ByteArray()
 
-public fun Iterable<Char>.toCesu8ByteArray(): ByteArray = this.toByteArray(Cesu8Encoder())
-
-private fun CharSequence.toByteArray(encoder: Encoder): ByteArray {
+public fun Iterable<Char>.toCesu8ByteArray(): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val writeNextByte: (Byte) -> Unit = { value: Byte ->
-        bytes.add(value)
-    }
+    val encoder = Cesu8Encoder({ byte -> bytes.add(byte) })
 
     for (char in this)
-        encoder.inputChar(char, writeNextByte)
-
-    return bytes.toByteArray()
-}
-
-private fun CharArray.toByteArray(encoder: Encoder): ByteArray {
-
-    val bytes = mutableListOf<Byte>()
-    val writeNextByte: (Byte) -> Unit = { value: Byte ->
-        bytes.add(value)
-    }
-
-    for (char in this)
-        encoder.inputChar(char, writeNextByte)
-
-    return bytes.toByteArray()
-}
-
-private fun Iterable<Char>.toByteArray(encoder: Encoder): ByteArray {
-
-    val bytes = mutableListOf<Byte>()
-    val writeNextByte: (Byte) -> Unit = { value: Byte ->
-        bytes.add(value)
-    }
-
-    for (char in this)
-        encoder.inputChar(char, writeNextByte)
+        encoder.input(char)
 
     return bytes.toByteArray()
 }

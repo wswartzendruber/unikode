@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class Utf8Encoder : Encoder() {
+public class Utf8Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 

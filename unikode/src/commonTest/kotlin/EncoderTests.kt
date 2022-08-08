@@ -23,16 +23,15 @@ class EncoderTests {
 
     @Test
     fun nothing() {
-        assertTrue(TestEncoder() scalarValuesEqual intArrayOf())
+        assertTrue(TestEncoder({ _: Byte -> }) scalarValuesEqual intArrayOf())
     }
 
     @Test
     fun single_char() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(' ', callback)
+        encoder.input(' ')
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0x20))
     }
@@ -40,11 +39,10 @@ class EncoderTests {
     @Test
     fun two_single_chars() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(0x20.toChar(), callback)
-        encoder.inputChar(0x40.toChar(), callback)
+        encoder.input(0x20.toChar())
+        encoder.input(0x40.toChar())
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0x20, 0x40))
     }
@@ -52,11 +50,10 @@ class EncoderTests {
     @Test
     fun surrogate_pair() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(0xD83D.toChar(), callback)
-        encoder.inputChar(0xDE00.toChar(), callback)
+        encoder.input(0xD83D.toChar())
+        encoder.input(0xDE00.toChar())
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0x1F600))
     }
@@ -64,10 +61,9 @@ class EncoderTests {
     @Test
     fun low_surrogate() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(0xDE00.toChar(), callback)
+        encoder.input(0xDE00.toChar())
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0xFFFD))
     }
@@ -75,11 +71,10 @@ class EncoderTests {
     @Test
     fun high_surrogate_single_char() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(0xD83D.toChar(), callback)
-        encoder.inputChar(0x20.toChar(), callback)
+        encoder.input(0xD83D.toChar())
+        encoder.input(0x20.toChar())
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0xFFFD, 0x20))
     }
@@ -87,12 +82,11 @@ class EncoderTests {
     @Test
     fun high_surrogate_surrogate_pair() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(0xD83C.toChar(), callback)
-        encoder.inputChar(0xD83D.toChar(), callback)
-        encoder.inputChar(0xDE00.toChar(), callback)
+        encoder.input(0xD83C.toChar())
+        encoder.input(0xD83D.toChar())
+        encoder.input(0xDE00.toChar())
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0xFFFD, 0x1F600))
     }
@@ -100,113 +94,16 @@ class EncoderTests {
     @Test
     fun high_surrogate_reset_single_char() {
 
-        val callback = { _: Byte -> }
-        val encoder = TestEncoder()
+        val encoder = TestEncoder({ _: Byte -> })
 
-        encoder.inputChar(0xD83D.toChar(), callback)
+        encoder.input(0xD83D.toChar())
         encoder.reset()
-        encoder.inputChar(' ', callback)
+        encoder.input(' ')
 
         assertTrue(encoder scalarValuesEqual intArrayOf(0x20))
     }
 
-    @Test
-    fun char_sequence_full() {
-
-        val input = "Hello"
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output)
-
-        assertTrue(encoder scalarValuesEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
-    }
-
-    @Test
-    fun char_sequence_slice() {
-
-        val input = "Hello"
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output, 1, 4)
-
-        assertTrue(encoder scalarValuesEqual intArrayOf(0x65, 0x6C, 0x6C))
-    }
-
-    @Test
-    fun char_sequence_slice_offset() {
-
-        val input = "Hello"
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output, 1, 4, 1)
-
-        assertTrue(output contentEquals byteArrayOf(0x00, 0x01, 0x01, 0x01, 0x00))
-    }
-
-    @Test
-    fun char_array_full() {
-
-        val input = charArrayOf('H', 'e', 'l', 'l', 'o')
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output)
-
-        assertTrue(encoder scalarValuesEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
-    }
-
-    @Test
-    fun char_array_slice() {
-
-        val input = charArrayOf('H', 'e', 'l', 'l', 'o')
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output, 1, 4)
-
-        assertTrue(encoder scalarValuesEqual intArrayOf(0x65, 0x6C, 0x6C))
-    }
-
-    @Test
-    fun char_array_slice_offset() {
-
-        val input = charArrayOf('H', 'e', 'l', 'l', 'o')
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output, 1, 4, 1)
-
-        assertTrue(output contentEquals byteArrayOf(0x00, 0x01, 0x01, 0x01, 0x00))
-    }
-
-    @Test
-    fun char_iterable() {
-
-        val input = listOf<Char>('H', 'e', 'l', 'l', 'o')
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output)
-
-        assertTrue(encoder scalarValuesEqual intArrayOf(0x48, 0x65, 0x6C, 0x6C, 0x6F))
-    }
-
-    @Test
-    fun char_iterable_offset() {
-
-        val input = listOf<Char>('e', 'l', 'l')
-        val output = ByteArray(5)
-        val encoder = TestEncoder()
-
-        encoder.encode(input, output, 1)
-
-        assertTrue(output contentEquals byteArrayOf(0x00, 0x01, 0x01, 0x01, 0x00))
-    }
-
-    class TestEncoder : Encoder() {
+    class TestEncoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
         val scalarValues = mutableListOf<Int>()
 

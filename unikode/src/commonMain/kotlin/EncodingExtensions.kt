@@ -16,71 +16,77 @@
 
 package org.unikode
 
-public fun CharSequence.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
+public fun CharSequence.toUtf8ByteArray(): ByteArray = this.asIterable().toUtf8ByteArray()
 
-public fun CharArray.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
+public fun CharSequence.toUtf16LeByteArray(): ByteArray = this.asIterable().toUtf16LeByteArray()
 
-public fun Iterable<Char>.toUtf8ByteArray(): ByteArray = this.toByteArray(Utf8Encoder())
+public fun CharSequence.toUtf16BeByteArray(): ByteArray = this.asIterable().toUtf16BeByteArray()
 
-public fun CharSequence.toUtf16BeByteArray(): ByteArray = this.toByteArray(Utf16BeEncoder())
+public fun CharSequence.toUtf32LeByteArray(): ByteArray = this.asIterable().toUtf32LeByteArray()
 
-public fun CharArray.toUtf16BeByteArray(): ByteArray = this.toByteArray(Utf16BeEncoder())
+public fun CharSequence.toUtf32BeByteArray(): ByteArray = this.asIterable().toUtf32BeByteArray()
 
-public fun Iterable<Char>.toUtf16BeByteArray(): ByteArray = this.toByteArray(Utf16BeEncoder())
+public fun CharArray.toUtf8ByteArray(): ByteArray = this.asIterable().toUtf8ByteArray()
 
-public fun CharSequence.toUtf16LeByteArray(): ByteArray = this.toByteArray(Utf16LeEncoder())
+public fun CharArray.toUtf16LeByteArray(): ByteArray = this.asIterable().toUtf16LeByteArray()
 
-public fun CharArray.toUtf16LeByteArray(): ByteArray = this.toByteArray(Utf16LeEncoder())
+public fun CharArray.toUtf16BeByteArray(): ByteArray = this.asIterable().toUtf16BeByteArray()
 
-public fun Iterable<Char>.toUtf16LeByteArray(): ByteArray = this.toByteArray(Utf16LeEncoder())
+public fun CharArray.toUtf32LeByteArray(): ByteArray = this.asIterable().toUtf32LeByteArray()
 
-public fun CharSequence.toUtf32BeByteArray(): ByteArray = this.toByteArray(Utf32BeEncoder())
+public fun CharArray.toUtf32BeByteArray(): ByteArray = this.asIterable().toUtf32BeByteArray()
 
-public fun CharArray.toUtf32BeByteArray(): ByteArray = this.toByteArray(Utf32BeEncoder())
-
-public fun Iterable<Char>.toUtf32BeByteArray(): ByteArray = this.toByteArray(Utf32BeEncoder())
-
-public fun CharSequence.toUtf32LeByteArray(): ByteArray = this.toByteArray(Utf32LeEncoder())
-
-public fun CharArray.toUtf32LeByteArray(): ByteArray = this.toByteArray(Utf32LeEncoder())
-
-public fun Iterable<Char>.toUtf32LeByteArray(): ByteArray = this.toByteArray(Utf32LeEncoder())
-
-private fun CharSequence.toByteArray(encoder: Encoder): ByteArray {
+public fun Iterable<Char>.toUtf8ByteArray(): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val writeNextByte: (Byte) -> Unit = { value: Byte ->
-        bytes.add(value)
-    }
+    val encoder = Utf8Encoder({ byte -> bytes.add(byte) })
 
     for (char in this)
-        encoder.inputChar(char, writeNextByte)
+        encoder.input(char)
 
     return bytes.toByteArray()
 }
 
-private fun CharArray.toByteArray(encoder: Encoder): ByteArray {
+public fun Iterable<Char>.toUtf16LeByteArray(): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val writeNextByte: (Byte) -> Unit = { value: Byte ->
-        bytes.add(value)
-    }
+    val encoder = Utf16LeEncoder({ byte -> bytes.add(byte) })
 
     for (char in this)
-        encoder.inputChar(char, writeNextByte)
+        encoder.input(char)
 
     return bytes.toByteArray()
 }
 
-private fun Iterable<Char>.toByteArray(encoder: Encoder): ByteArray {
+public fun Iterable<Char>.toUtf16BeByteArray(): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val writeNextByte: (Byte) -> Unit = { value: Byte ->
-        bytes.add(value)
-    }
+    val encoder = Utf16BeEncoder({ byte -> bytes.add(byte) })
 
     for (char in this)
-        encoder.inputChar(char, writeNextByte)
+        encoder.input(char)
+
+    return bytes.toByteArray()
+}
+
+public fun Iterable<Char>.toUtf32LeByteArray(): ByteArray {
+
+    val bytes = mutableListOf<Byte>()
+    val encoder = Utf32LeEncoder({ byte -> bytes.add(byte) })
+
+    for (char in this)
+        encoder.input(char)
+
+    return bytes.toByteArray()
+}
+
+public fun Iterable<Char>.toUtf32BeByteArray(): ByteArray {
+
+    val bytes = mutableListOf<Byte>()
+    val encoder = Utf32BeEncoder({ byte -> bytes.add(byte) })
+
+    for (char in this)
+        encoder.input(char)
 
     return bytes.toByteArray()
 }
