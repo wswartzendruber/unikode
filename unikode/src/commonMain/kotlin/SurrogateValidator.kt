@@ -96,13 +96,13 @@ public class SurrogateValidator(private val callback: (Char) -> Unit) {
             }
         }
 
-    public fun reset(): Unit {
-        highSurrogate = -1
-    }
-
     public fun flush(): Unit {
         if (highSurrogate != -1)
             callback(REPLACEMENT_CHAR)
         reset()
+    }
+
+    public fun reset(): Unit {
+        highSurrogate = -1
     }
 }

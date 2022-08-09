@@ -18,30 +18,9 @@ package org.unikode
 
 public class Utf8Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
+    private val thompsonEncoder = ThompsonEncoder(callback)
     private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
-        when {
-            scalarValue < 0x80 -> {
-                callback(scalarValue.toByte())
-            }
-            scalarValue < 0x800 -> {
-                callback((0xC0 or (scalarValue ushr 6)).toByte())
-                callback((0x80 or (scalarValue and 0x3F)).toByte())
-            }
-            scalarValue < 0x10000 -> {
-                callback((0xE0 or (scalarValue ushr 12)).toByte())
-                callback((0x80 or (scalarValue ushr 6 and 0x3F)).toByte())
-                callback((0x80 or (scalarValue and 0x3F)).toByte())
-            }
-            scalarValue < 0x110000 -> {
-                callback((0xF0 or (scalarValue ushr 18)).toByte())
-                callback((0x80 or (scalarValue ushr 12 and 0x3F)).toByte())
-                callback((0x80 or (scalarValue ushr 6 and 0x3F)).toByte())
-                callback((0x80 or (scalarValue and 0x3F)).toByte())
-            }
-            else -> {
-                throw IllegalStateException("Got invalid value from superclass.")
-            }
-        }
+        thompsonEncoder.input(scalarValue)
     })
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
