@@ -16,7 +16,7 @@
 
 package org.unikode
 
-public class SurrogateChecker(private val callback: (Char) -> Unit) {
+public class SurrogateValidator(private val callback: (Char) -> Unit) {
 
     private var highSurrogate = -1
 
@@ -58,7 +58,51 @@ public class SurrogateChecker(private val callback: (Char) -> Unit) {
             }
         }
 
+    public fun input(value: Int): Unit =
+        if (highSurrogate == -1) {
+            when {
+                !value.isSurrogate() -> {
+                    callback(value.toChar())
+                }
+                value.isHighSurrogate() -> {
+                    highSurrogate = value
+                }
+                value.isLowSurrogate() -> {
+                    callback(REPLACEMENT_CHAR)
+                }
+                else -> {
+                    throw IllegalStateException("Internal state is irrational.")
+                }
+            }
+        } else {
+            when {
+                value.isLowSurrogate() -> {
+                    callback(highSurrogate.toChar())
+                    callback(value.toChar())
+                    highSurrogate = -1
+                }
+                !value.isSurrogate() -> {
+                    callback(REPLACEMENT_CHAR)
+                    highSurrogate = -1
+                    callback(value.toChar())
+                }
+                value.isHighSurrogate() -> {
+                    callback(REPLACEMENT_CHAR)
+                    highSurrogate = value
+                }
+                else -> {
+                    throw IllegalStateException("Internal state is irrational.")
+                }
+            }
+        }
+
     public fun reset(): Unit {
         highSurrogate = -1
+    }
+
+    public fun flush(): Unit {
+        if (highSurrogate != -1)
+            callback(REPLACEMENT_CHAR)
+        reset()
     }
 }

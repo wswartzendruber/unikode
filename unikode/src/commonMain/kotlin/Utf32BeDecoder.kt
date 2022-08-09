@@ -16,9 +16,31 @@
 
 package org.unikode
 
-public class Utf32BeDecoder(callback: (Char) -> Unit) : Utf32Decoder(callback) {
+public class Utf32BeDecoder(callback: (Char) -> Unit) : Decoder(callback) {
 
-    protected override fun currentBytesToScalarValue(): Int =
+    private val surrogateDecomposer = SurrogateDecomposer(callback)
+    private val currentBytes = IntArray(4)
+    private var currentByteIndex = 0
+
+    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
+
+    public override fun input(value: Byte): Unit {
+        currentBytes[currentByteIndex++] = value.toInt() and 0xFF
+        if (currentByteIndex == 4) {
+            surrogateDecomposer.input(currentBytesToScalarValue())
+            currentByteIndex = 0
+        }
+    }
+
+    public override fun reset(): Unit {
+        currentBytes[0] = 0x00
+        currentBytes[1] = 0x00
+        currentBytes[2] = 0x00
+        currentBytes[3] = 0x00
+        currentByteIndex = 0
+    }
+
+    private fun currentBytesToScalarValue(): Int =
         (currentBytes[0] shl 24) or
         (currentBytes[1] shl 16) or
         (currentBytes[2] shl 8) or

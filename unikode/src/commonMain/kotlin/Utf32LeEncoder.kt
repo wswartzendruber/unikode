@@ -16,12 +16,18 @@
 
 package org.unikode
 
-public class Utf32LeEncoder(callback: (Byte) -> Unit) : Utf32Encoder(callback) {
+public class Utf32LeEncoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
-    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit {
-        callback((value and 0xFF).toByte())
-        callback((value and 0xFF00 ushr 8).toByte())
-        callback((value and 0xFF0000 ushr 16).toByte())
+    private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
+        callback((scalarValue and 0xFF).toByte())
+        callback((scalarValue and 0xFF00 ushr 8).toByte())
+        callback((scalarValue and 0xFF0000 ushr 16).toByte())
         callback(0x0)
-    }
+    })
+
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
+
+    public override fun input(value: Char): Unit = surrogateComposer.input(value)
+
+    public override fun reset(): Unit = surrogateComposer.reset()
 }

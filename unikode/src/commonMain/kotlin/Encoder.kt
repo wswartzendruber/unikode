@@ -16,23 +16,11 @@
 
 package org.unikode
 
-public abstract class Encoder(private val callback: (Byte) -> Unit) {
-
-    private val scalarValueCallback = { scalarValue: Int ->
-        inputScalarValue(scalarValue, callback)
-    }
-    private val surrogateComposer = SurrogateComposer(scalarValueCallback)
+public abstract class Encoder(protected val callback: (Byte) -> Unit) {
 
     public abstract fun maxBytesNeeded(charCount: Int): Int
 
-    public fun input(value: Char): Unit = surrogateComposer.input(value)
+    public abstract fun input(value: Char): Unit
 
-    protected abstract fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit
-
-    public fun reset(): Unit {
-        surrogateComposer.reset()
-        resetState()
-    }
-
-    protected open fun resetState(): Unit { }
+    public open fun reset(): Unit { }
 }

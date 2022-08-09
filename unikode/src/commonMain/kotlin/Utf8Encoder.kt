@@ -18,38 +18,35 @@ package org.unikode
 
 public class Utf8Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
-    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
-
-    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
-        when (value) {
-            in oneByteRange -> {
-                callback(value.toByte())
+    private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
+        when {
+            scalarValue < 0x80 -> {
+                callback(scalarValue.toByte())
             }
-            in twoByteRange -> {
-                callback((0xC0 or (value ushr 6)).toByte())
-                callback((0x80 or (value and 0x3F)).toByte())
+            scalarValue < 0x800 -> {
+                callback((0xC0 or (scalarValue ushr 6)).toByte())
+                callback((0x80 or (scalarValue and 0x3F)).toByte())
             }
-            in threeByteRange -> {
-                callback((0xE0 or (value ushr 12)).toByte())
-                callback((0x80 or (value ushr 6 and 0x3F)).toByte())
-                callback((0x80 or (value and 0x3F)).toByte())
+            scalarValue < 0x10000 -> {
+                callback((0xE0 or (scalarValue ushr 12)).toByte())
+                callback((0x80 or (scalarValue ushr 6 and 0x3F)).toByte())
+                callback((0x80 or (scalarValue and 0x3F)).toByte())
             }
-            in fourByteRange -> {
-                callback((0xF0 or (value ushr 18)).toByte())
-                callback((0x80 or (value ushr 12 and 0x3F)).toByte())
-                callback((0x80 or (value ushr 6 and 0x3F)).toByte())
-                callback((0x80 or (value and 0x3F)).toByte())
+            scalarValue < 0x110000 -> {
+                callback((0xF0 or (scalarValue ushr 18)).toByte())
+                callback((0x80 or (scalarValue ushr 12 and 0x3F)).toByte())
+                callback((0x80 or (scalarValue ushr 6 and 0x3F)).toByte())
+                callback((0x80 or (scalarValue and 0x3F)).toByte())
             }
             else -> {
                 throw IllegalStateException("Got invalid value from superclass.")
             }
         }
+    })
 
-    private companion object {
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
-        private val oneByteRange = 0x00..0x7F
-        private val twoByteRange = 0x080..0x7FF
-        private val threeByteRange = 0x0800..0xFFFF
-        private val fourByteRange = 0x010000..0x10FFFF
-    }
+    public override fun input(value: Char): Unit = surrogateComposer.input(value)
+
+    public override fun reset(): Unit = surrogateComposer.reset()
 }

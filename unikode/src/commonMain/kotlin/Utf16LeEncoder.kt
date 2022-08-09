@@ -16,18 +16,16 @@
 
 package org.unikode
 
-public class Utf16LeEncoder(callback: (Byte) -> Unit) : Utf16Encoder(callback) {
+public class Utf16LeEncoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
-    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
-        if (value <= 0xFFFF) {
-            callback((value and 0xFF).toByte())
-            callback((value and 0xFF00 ushr 8).toByte())
-        } else {
-            val highSurrogate = value.highSurrogate()
-            val lowSurrogate = value.lowSurrogate()
-            callback((highSurrogate and 0xFF).toByte())
-            callback((highSurrogate and 0xFF00 ushr 8).toByte())
-            callback((lowSurrogate and 0xFF).toByte())
-            callback((lowSurrogate and 0xFF00 ushr 8).toByte())
-        }
+    private val surrogateValidator = SurrogateValidator({ codeUnit ->
+        callback((codeUnit.code and 0xFF).toByte())
+        callback((codeUnit.code and 0xFF00 ushr 8).toByte())
+    })
+
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 2
+
+    public override fun input(value: Char): Unit = surrogateValidator.input(value)
+
+    public override fun reset(): Unit = surrogateValidator.reset()
 }

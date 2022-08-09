@@ -16,7 +16,29 @@
 
 package org.unikode
 
-public class Utf16LeDecoder(callback: (Char) -> Unit) : Utf16Decoder(callback) {
+public class Utf16LeDecoder(callback: (Char) -> Unit) : Decoder(callback) {
 
-    protected override fun bytePairToChar(high: Int, low: Int): Int = high or (low shl 8)
+    private val surrogateValidator = SurrogateValidator(callback)
+    private var bufferedByte = -1
+
+    public override fun maxCharsNeeded(byteCount: Int): Int = byteCount / 2
+
+    public override fun input(value: Byte): Unit {
+        if (bufferedByte == -1) {
+            bufferedByte = value.toInt() and 0xFF
+        } else {
+            surrogateValidator.input(bytePairToChar(bufferedByte, value.toInt() and 0xFF))
+            bufferedByte = -1
+        }
+    }
+
+    public override fun reset(): Unit {
+        surrogateValidator.flush()
+        bufferedByte = -1
+    }
+
+    private companion object {
+
+        private fun bytePairToChar(high: Int, low: Int) = high or (low shl 8)
+    }
 }

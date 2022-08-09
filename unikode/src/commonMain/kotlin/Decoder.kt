@@ -18,33 +18,9 @@ package org.unikode
 
 public abstract class Decoder(private val callback: (Char) -> Unit) {
 
-    private val scalarValueCallback = { value: Int ->
-        when (value) {
-            in bmpRange1, in bmpRange2 -> {
-                callback(value.toChar())
-            }
-            in extRange -> {
-                callback(value.highSurrogate())
-                callback(value.lowSurrogate())
-            }
-            else -> {
-                callback(REPLACEMENT_CHAR)
-            }
-        }
-    }
-
     public abstract fun maxCharsNeeded(byteCount: Int): Int
 
-    public fun input(value: Byte): Unit = inputByte(value, scalarValueCallback)
+    public abstract fun input(value: Byte): Unit
 
-    protected abstract fun inputByte(value: Byte, callback: (Int) -> Unit): Unit
-
-    public abstract fun reset(): Unit
-
-    private companion object {
-
-        private val bmpRange1 = 0x0000..0xD7FF
-        private val bmpRange2 = 0xE000..0xFFFF
-        private val extRange = 0x010000..0x10FFFF
-    }
+    public open fun reset(): Unit { }
 }

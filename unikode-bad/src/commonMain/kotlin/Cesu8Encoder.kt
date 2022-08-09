@@ -17,39 +17,48 @@
 package org.unikode.bad
 
 import org.unikode.Encoder
+import org.unikode.SurrogateComposer
 
 public class Cesu8Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
-    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
-
-    protected override fun inputScalarValue(value: Int, callback: (Byte) -> Unit): Unit =
-        when (value) {
-            in 0x00..0x7F -> {
-                callback(value.toByte())
+    private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
+        when {
+            scalarValue < 0x80 -> {
+                callback(scalarValue.toByte())
             }
-            in 0x080..0x7FF -> {
-                callback((0xC0 or (value ushr 6)).toByte())
-                callback((0x80 or (value and 0x3F)).toByte())
+            scalarValue < 0x800 -> {
+                callback((0xC0 or (scalarValue ushr 6)).toByte())
+                callback((0x80 or (scalarValue and 0x3F)).toByte())
             }
-            in 0x0800..0xFFFF -> {
-                writeTripleByte(value, callback)
+            scalarValue < 0x10000 -> {
+                writeTripleByte(scalarValue)
             }
-            in 0x010000..0x10FFFF -> {
-                writeTripleByte(value.highSurrogate(), callback)
-                writeTripleByte(value.lowSurrogate(), callback)
+            scalarValue < 0x110000 -> {
+                writeTripleByte(scalarValue.highSurrogate())
+                writeTripleByte(scalarValue.lowSurrogate())
             }
             else -> {
                 throw IllegalStateException("Got invalid value from superclass.")
             }
         }
+    })
 
-    private fun writeTripleByte(value: Int, callback: (Byte) -> Unit) {
+    public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
+
+    public override fun input(value: Char): Unit = surrogateComposer.input(value)
+
+    public override fun reset(): Unit = surrogateComposer.reset()
+
+    private fun writeTripleByte(value: Int) {
         callback((0xE0 or (value ushr 12)).toByte())
         callback((0x80 or (value ushr 6 and 0x3F)).toByte())
         callback((0x80 or (value and 0x3F)).toByte())
     }
 
-    private fun Int.highSurrogate(): Int = ((this - 0x10000) ushr 10) + 0xD800
+    private companion object {
 
-    private fun Int.lowSurrogate(): Int = ((this - 0x10000) and 0x3FF) + 0xDC00
+        private fun Int.highSurrogate(): Int = ((this - 0x10000) ushr 10) + 0xD800
+
+        private fun Int.lowSurrogate(): Int = ((this - 0x10000) and 0x3FF) + 0xDC00
+    }
 }
