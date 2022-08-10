@@ -25,7 +25,15 @@ public class Utf8Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
-    public override fun input(value: Byte): Unit = thompsonDecoder.input(value)
+    public override fun input(value: Byte): Unit {
+        thompsonDecoder.input(value)
+    }
 
-    public override fun reset(): Unit = thompsonDecoder.reset()
+    public override fun flush(): Unit {
+        thompsonDecoder.flush()
+    }
+
+    public override fun reset(): Unit {
+        thompsonDecoder.reset()
+    }
 }

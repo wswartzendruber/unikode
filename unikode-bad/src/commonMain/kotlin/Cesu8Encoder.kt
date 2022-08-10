@@ -29,7 +29,15 @@ public class Cesu8Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 3
 
-    public override fun input(value: Char): Unit = surrogateValidator.input(value)
+    public override fun input(value: Char): Unit {
+        surrogateValidator.input(value)
+    }
 
-    public override fun reset(): Unit = surrogateValidator.reset()
+    public override fun flush(): Unit {
+        surrogateValidator.flush()
+    }
+
+    public override fun reset(): Unit {
+        surrogateValidator.reset()
+    }
 }

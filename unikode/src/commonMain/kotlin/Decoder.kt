@@ -16,11 +16,13 @@
 
 package org.unikode
 
-public abstract class Decoder(private val callback: (Char) -> Unit) {
+public abstract class Decoder(protected val callback: (Char) -> Unit) {
 
     public abstract fun maxCharsNeeded(byteCount: Int): Int
 
     public abstract fun input(value: Byte): Unit
+
+    public open fun flush(): Unit { }
 
     public open fun reset(): Unit { }
 }

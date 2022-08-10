@@ -32,6 +32,13 @@ public class Utf32BeDecoder(callback: (Char) -> Unit) : Decoder(callback) {
         }
     }
 
+    public override fun flush(): Unit {
+        if (currentByteIndex != 0) {
+            callback(REPLACEMENT_CHAR)
+            currentByteIndex = 0
+        }
+    }
+
     public override fun reset(): Unit {
         currentBytes[0] = 0x00
         currentBytes[1] = 0x00

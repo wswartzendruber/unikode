@@ -22,5 +22,7 @@ public abstract class Encoder(protected val callback: (Byte) -> Unit) {
 
     public abstract fun input(value: Char): Unit
 
+    public open fun flush(): Unit { }
+
     public open fun reset(): Unit { }
 }

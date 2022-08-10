@@ -95,9 +95,10 @@ public class SurrogateComposer(private val callback: (Int) -> Unit) {
         }
 
     public fun flush(): Unit {
-        if (highSurrogate != -1)
+        if (highSurrogate != -1) {
             callback(REPLACEMENT_CODE)
-        reset()
+            highSurrogate = -1
+        }
     }
 
     public fun reset(): Unit {

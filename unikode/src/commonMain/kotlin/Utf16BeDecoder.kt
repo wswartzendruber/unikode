@@ -32,8 +32,16 @@ public class Utf16BeDecoder(callback: (Char) -> Unit) : Decoder(callback) {
         }
     }
 
-    public override fun reset(): Unit {
+    public override fun flush(): Unit {
         surrogateValidator.flush()
+        if (bufferedByte != -1) {
+            callback(REPLACEMENT_CHAR)
+            bufferedByte = -1
+        }
+    }
+
+    public override fun reset(): Unit {
+        surrogateValidator.reset()
         bufferedByte = -1
     }
 

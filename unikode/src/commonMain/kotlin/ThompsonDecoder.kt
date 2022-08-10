@@ -52,11 +52,13 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
                 }
                 valueInt and 0xFC == 0xF8 -> {
                     continuing = true
+                    currentBytes[0] = valueInt
                     currentBytesExpected = 5
                     currentByteIndex = 1
                 }
                 valueInt and 0xFE == 0xFC -> {
                     continuing = true
+                    currentBytes[0] = valueInt
                     currentBytesExpected = 6
                     currentByteIndex = 1
                 }
@@ -119,6 +121,13 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
                 callback(REPLACEMENT_CODE)
                 input(value)
             }
+        }
+    }
+
+    public fun flush(): Unit {
+        if (continuing) {
+            callback(REPLACEMENT_CODE)
+            continuing = false
         }
     }
 
