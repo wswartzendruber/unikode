@@ -25,6 +25,7 @@ public fun Iterable<Byte>.toStringCesu8(): String {
 
     for (byte in this)
         decoder.input(byte)
+    decoder.flush()
 
     return builder.toString()
 }

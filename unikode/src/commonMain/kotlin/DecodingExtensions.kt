@@ -33,6 +33,7 @@ public fun Iterable<Byte>.toStringUtf8(): String {
 
     for (byte in this)
         decoder.input(byte)
+    decoder.flush()
 
     return builder.toString()
 }
@@ -44,6 +45,7 @@ public fun Iterable<Byte>.toStringUtf16Le(): String {
 
     for (byte in this)
         decoder.input(byte)
+    decoder.flush()
 
     return builder.toString()
 }
@@ -55,6 +57,7 @@ public fun Iterable<Byte>.toStringUtf16Be(): String {
 
     for (byte in this)
         decoder.input(byte)
+    decoder.flush()
 
     return builder.toString()
 }
@@ -66,6 +69,7 @@ public fun Iterable<Byte>.toStringUtf32Le(): String {
 
     for (byte in this)
         decoder.input(byte)
+    decoder.flush()
 
     return builder.toString()
 }
@@ -77,6 +81,7 @@ public fun Iterable<Byte>.toStringUtf32Be(): String {
 
     for (byte in this)
         decoder.input(byte)
+    decoder.flush()
 
     return builder.toString()
 }

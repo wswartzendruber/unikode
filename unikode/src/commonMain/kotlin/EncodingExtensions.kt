@@ -43,6 +43,7 @@ public fun Iterable<Char>.toUtf8ByteArray(): ByteArray {
 
     for (char in this)
         encoder.input(char)
+    encoder.flush()
 
     return bytes.toByteArray()
 }
@@ -54,6 +55,7 @@ public fun Iterable<Char>.toUtf16LeByteArray(): ByteArray {
 
     for (char in this)
         encoder.input(char)
+    encoder.flush()
 
     return bytes.toByteArray()
 }
@@ -65,6 +67,7 @@ public fun Iterable<Char>.toUtf16BeByteArray(): ByteArray {
 
     for (char in this)
         encoder.input(char)
+    encoder.flush()
 
     return bytes.toByteArray()
 }
@@ -76,6 +79,7 @@ public fun Iterable<Char>.toUtf32LeByteArray(): ByteArray {
 
     for (char in this)
         encoder.input(char)
+    encoder.flush()
 
     return bytes.toByteArray()
 }
@@ -87,6 +91,7 @@ public fun Iterable<Char>.toUtf32BeByteArray(): ByteArray {
 
     for (char in this)
         encoder.input(char)
+    encoder.flush()
 
     return bytes.toByteArray()
 }

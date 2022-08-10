@@ -29,6 +29,7 @@ public fun Iterable<Char>.toCesu8ByteArray(): ByteArray {
 
     for (char in this)
         encoder.input(char)
+    encoder.flush()
 
     return bytes.toByteArray()
 }
