@@ -118,6 +118,24 @@ class Utf8DecoderTests {
         assertEquals("� ", output)
     }
 
+    @Test
+    fun flush_pending_sequence_1() {
+
+        val input = byteArrayOf(-0x13)
+        val output = input.toStringUtf8()
+
+        assertEquals("�", output)
+    }
+
+    @Test
+    fun flush_pending_sequence_2() {
+
+        val input = byteArrayOf(-0x13, -0x6B)
+        val output = input.toStringUtf8()
+
+        assertEquals("�", output)
+    }
+
     companion object {
 
         fun two_byte_value(destination: ByteArray, value: Int) {
