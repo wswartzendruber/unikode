@@ -19,7 +19,7 @@ package org.unikode
 public class ThompsonDecoder(private val callback: (Int) -> Unit) {
 
     private var continuing = false
-    private val currentBytes = IntArray(6)
+    private var currentScalarValue = 0
     private var currentBytesExpected = 0
     private var currentByteIndex = 0
 
@@ -28,93 +28,50 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
         val valueInt = value.toInt()
 
         if (!continuing) {
-            when {
-                valueInt and 0x80 == 0x00 -> {
-                    callback(valueInt)
-                }
-                valueInt and 0xE0 == 0xC0 -> {
-                    continuing = true
-                    currentBytes[0] = valueInt
-                    currentBytesExpected = 2
-                    currentByteIndex = 1
-                }
-                valueInt and 0xF0 == 0xE0 -> {
-                    continuing = true
-                    currentBytes[0] = valueInt
-                    currentBytesExpected = 3
-                    currentByteIndex = 1
-                }
-                valueInt and 0xF8 == 0xF0 -> {
-                    continuing = true
-                    currentBytes[0] = valueInt
-                    currentBytesExpected = 4
-                    currentByteIndex = 1
-                }
-                valueInt and 0xFC == 0xF8 -> {
-                    continuing = true
-                    currentBytes[0] = valueInt
-                    currentBytesExpected = 5
-                    currentByteIndex = 1
-                }
-                valueInt and 0xFE == 0xFC -> {
-                    continuing = true
-                    currentBytes[0] = valueInt
-                    currentBytesExpected = 6
-                    currentByteIndex = 1
-                }
-                else -> {
-                    reset()
-                    callback(REPLACEMENT_CODE)
+            if (valueInt and 0x80 == 0x00) {
+                callback(valueInt)
+            } else {
+                continuing = true
+                currentByteIndex = 1
+                when {
+                    valueInt and 0xE0 == 0xC0 -> {
+                        currentScalarValue = valueInt and 0x1F
+                        currentBytesExpected = 2
+                    }
+                    valueInt and 0xF0 == 0xE0 -> {
+                        currentScalarValue = valueInt and 0x0F
+                        currentBytesExpected = 3
+                    }
+                    valueInt and 0xF8 == 0xF0 -> {
+                        currentScalarValue = valueInt and 0x07
+                        currentBytesExpected = 4
+                    }
+                    valueInt and 0xFC == 0xF8 -> {
+                        currentScalarValue = valueInt and 0x03
+                        currentBytesExpected = 5
+                    }
+                    valueInt and 0xFE == 0xFC -> {
+                        currentScalarValue = valueInt and 0x01
+                        currentBytesExpected = 6
+                    }
+                    else -> {
+                        reset()
+                        callback(REPLACEMENT_CODE)
+                    }
                 }
             }
         } else {
             if (valueInt and 0xC0 == 0x80) {
-                currentBytes[currentByteIndex++] = valueInt
+                currentScalarValue = (currentScalarValue shl 6) or (valueInt and 0x3F)
+                currentByteIndex++
                 if (currentByteIndex == currentBytesExpected) {
-                    val scalarValue = when (currentBytesExpected) {
-                        2 -> {
-                            val temp = (currentBytes[0] and 0x1F shl 6) or
-                                (currentBytes[1] and 0x3F)
-                            if (temp > 0x7F) {
-                                temp
-                            } else {
-                                reset()
-                                REPLACEMENT_CODE
-                            }
-                        }
-                        3 -> {
-                            val temp = (currentBytes[0] and 0x0F shl 12) or
-                                (currentBytes[1] and 0x3F shl 6) or
-                                (currentBytes[2] and 0x3F)
-                            if (temp > 0x7FF) {
-                                temp
-                            } else {
-                                reset()
-                                REPLACEMENT_CODE
-                            }
-                        }
-                        4 -> {
-                            val temp = (currentBytes[0] and 0x07 shl 18) or
-                                (currentBytes[1] and 0x3F shl 12) or
-                                (currentBytes[2] and 0x3F shl 6) or
-                                (currentBytes[3] and 0x3F)
-                            if (temp > 0xFFFF) {
-                                temp
-                            } else {
-                                reset()
-                                REPLACEMENT_CODE
-                            }
-                        }
-                        5, 6 -> {
-                            reset()
-                            REPLACEMENT_CODE
-                        }
-                        else -> {
-                            throw IllegalStateException("Internal state is irrational.")
-                        }
+                    if (currentScalarValue > scalarValueMap[currentBytesExpected]) {
+                        continuing = false
+                        callback(currentScalarValue)
+                    } else {
+                        reset()
+                        callback(REPLACEMENT_CODE)
                     }
-                    continuing = false
-                    callback(scalarValue)
                 }
             } else {
                 reset()
@@ -133,13 +90,13 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
 
     public fun reset(): Unit {
         continuing = false
-        currentBytes[0] = 0x00
-        currentBytes[1] = 0x00
-        currentBytes[2] = 0x00
-        currentBytes[3] = 0x00
-        currentBytes[4] = 0x00
-        currentBytes[5] = 0x00
+        currentScalarValue = 0
         currentBytesExpected = 0
         currentByteIndex = 0
+    }
+
+    private companion object {
+
+        private val scalarValueMap = intArrayOf(0, 0, 0x7F, 0x7FF, 0xFFFF, 0x1FFFFF, 0x3FFFFFF)
     }
 }
