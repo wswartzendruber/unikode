@@ -22,6 +22,7 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
     private var currentScalarValue = 0
     private var currentBytesExpected = 0
     private var currentByteIndex = 0
+    private var minimumScalarValue = 0
 
     public fun input(value: Byte): Unit {
 
@@ -37,22 +38,27 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
                     valueInt and 0xE0 == 0xC0 -> {
                         currentScalarValue = valueInt and 0x1F
                         currentBytesExpected = 2
+                        minimumScalarValue = 0x7F
                     }
                     valueInt and 0xF0 == 0xE0 -> {
                         currentScalarValue = valueInt and 0x0F
                         currentBytesExpected = 3
+                        minimumScalarValue = 0x7FF
                     }
                     valueInt and 0xF8 == 0xF0 -> {
                         currentScalarValue = valueInt and 0x07
                         currentBytesExpected = 4
+                        minimumScalarValue = 0xFFFF
                     }
                     valueInt and 0xFC == 0xF8 -> {
                         currentScalarValue = valueInt and 0x03
                         currentBytesExpected = 5
+                        minimumScalarValue = 0x1FFFFF
                     }
                     valueInt and 0xFE == 0xFC -> {
                         currentScalarValue = valueInt and 0x01
                         currentBytesExpected = 6
+                        minimumScalarValue = 0x3FFFFFF
                     }
                     else -> {
                         reset()
@@ -63,9 +69,8 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
         } else {
             if (valueInt and 0xC0 == 0x80) {
                 currentScalarValue = (currentScalarValue shl 6) or (valueInt and 0x3F)
-                currentByteIndex++
-                if (currentByteIndex == currentBytesExpected) {
-                    if (currentScalarValue > scalarValueMap[currentBytesExpected]) {
+                if (++currentByteIndex == currentBytesExpected) {
+                    if (currentScalarValue > minimumScalarValue) {
                         continuing = false
                         callback(currentScalarValue)
                     } else {
@@ -93,10 +98,7 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
         currentScalarValue = 0
         currentBytesExpected = 0
         currentByteIndex = 0
-    }
-
-    private companion object {
-
-        private val scalarValueMap = intArrayOf(0, 0, 0x7F, 0x7FF, 0xFFFF, 0x1FFFFF, 0x3FFFFFF)
+        currentScalarValue = 0
+        minimumScalarValue = 0
     }
 }
