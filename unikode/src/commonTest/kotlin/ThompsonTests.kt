@@ -157,36 +157,270 @@ class ThompsonTests {
     }
 
     @Test
-    fun reject_incomplete_sequence_1() {
+    fun reject_incomplete_sequence_1_of_2() {
 
-        val input = byteArrayOf(-0x13, 0x20)
+        val input = byteArrayOf(-0x40, 0x20)
         val output = input.toIntArrayThompson()
 
         assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
     }
 
     @Test
-    fun reject_incomplete_sequence_2() {
+    fun reject_incomplete_sequence_1_of_3() {
 
-        val input = byteArrayOf(-0x13, -0x6B, 0x20)
+        val input = byteArrayOf(-0x20, 0x20)
         val output = input.toIntArrayThompson()
 
         assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
     }
 
     @Test
-    fun flush_pending_sequence_1() {
+    fun reject_incomplete_sequence_2_of_3() {
 
-        val input = byteArrayOf(-0x13)
+        val input = byteArrayOf(-0x20, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_1_of_4() {
+
+        val input = byteArrayOf(-0x10, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_2_of_4() {
+
+        val input = byteArrayOf(-0x10, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_3_of_4() {
+
+        val input = byteArrayOf(-0x10, -0x80, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_1_of_5() {
+
+        val input = byteArrayOf(-0x08, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_2_of_5() {
+
+        val input = byteArrayOf(-0x08, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_3_of_5() {
+
+        val input = byteArrayOf(-0x08, -0x80, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_4_of_5() {
+
+        val input = byteArrayOf(-0x08, -0x80, -0x80, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_1_of_6() {
+
+        val input = byteArrayOf(-0x04, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_2_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_3_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_4_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, -0x80, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun reject_incomplete_sequence_5_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, -0x80, -0x80, -0x80, 0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE, 0x20) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_1_of_2() {
+
+        val input = byteArrayOf(-0x40)
         val output = input.toIntArrayThompson()
 
         assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
     }
 
     @Test
-    fun flush_pending_sequence_2() {
+    fun flush_incomplete_sequence_1_of_3() {
 
-        val input = byteArrayOf(-0x13, -0x6B)
+        val input = byteArrayOf(-0x20)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_2_of_3() {
+
+        val input = byteArrayOf(-0x20, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_1_of_4() {
+
+        val input = byteArrayOf(-0x10)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_2_of_4() {
+
+        val input = byteArrayOf(-0x10, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_3_of_4() {
+
+        val input = byteArrayOf(-0x10, -0x80, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_1_of_5() {
+
+        val input = byteArrayOf(-0x08)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_2_of_5() {
+
+        val input = byteArrayOf(-0x08, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_3_of_5() {
+
+        val input = byteArrayOf(-0x08, -0x80, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_4_of_5() {
+
+        val input = byteArrayOf(-0x08, -0x80, -0x80, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_1_of_6() {
+
+        val input = byteArrayOf(-0x04)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_2_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_3_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_4_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, -0x80, -0x80)
+        val output = input.toIntArrayThompson()
+
+        assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
+    }
+
+    @Test
+    fun flush_incomplete_sequence_5_of_6() {
+
+        val input = byteArrayOf(-0x04, -0x80, -0x80, -0x80, -0x80)
         val output = input.toIntArrayThompson()
 
         assertTrue(intArrayOf(REPLACEMENT_CODE) contentEquals output)
