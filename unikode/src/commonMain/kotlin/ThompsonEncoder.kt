@@ -39,14 +39,14 @@ public class ThompsonEncoder(private val callback: (Byte) -> Unit) {
                 callback((0x80 or (value and 0x3F)).toByte())
             }
             value < 0x4000000 -> {
-                callback((0xF0 or (value ushr 24)).toByte())
+                callback((0xF8 or (value ushr 24)).toByte())
                 callback((0x80 or (value ushr 18 and 0x3F)).toByte())
                 callback((0x80 or (value ushr 12 and 0x3F)).toByte())
                 callback((0x80 or (value ushr 6 and 0x3F)).toByte())
                 callback((0x80 or (value and 0x3F)).toByte())
             }
             value <= 0x7FFFFFFF -> {
-                callback((0xF0 or (value ushr 30)).toByte())
+                callback((0xFC or (value ushr 30)).toByte())
                 callback((0x80 or (value ushr 24 and 0x3F)).toByte())
                 callback((0x80 or (value ushr 18 and 0x3F)).toByte())
                 callback((0x80 or (value ushr 12 and 0x3F)).toByte())
