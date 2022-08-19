@@ -23,7 +23,7 @@ import org.unikode.ThompsonDecoder
 class ThompsonTests {
 
     @Test
-    fun round_trip_tests() {
+    fun round_trip() {
 
         var index = 0
         val decoder = ThompsonDecoder({ value: Int ->

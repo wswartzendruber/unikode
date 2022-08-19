@@ -12,7 +12,23 @@
 
 package org.unikode.test
 
+import org.unikode.highSurrogate
+import org.unikode.lowSurrogate
+
 const val TEXT = "This제가Монголलुम्बिनीis가미정언гэрवनa식당에नेपालtest있어요болकेdocument🇰🇷Төвतराई😀"
+
+val completeString = StringBuilder()
+    .also {
+        for (i in 0x0000..0xD7FF)
+            it.append(i.toChar())
+        for (i in 0xE000..0xFFFF)
+            it.append(i.toChar())
+        for (i in 0x010000..0x10FFFF) {
+            it.append(i.highSurrogate())
+            it.append(i.lowSurrogate())
+        }
+    }
+    .toString()
 
 val textByteArrayUtf8 = byteArrayOf(
     84, 104, 105, 115, -20, -96, -100, -22, -80, -128, -48, -100, -48, -66, -48, -67, -48, -77,

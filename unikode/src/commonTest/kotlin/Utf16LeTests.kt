@@ -13,12 +13,14 @@
 package org.unikode.test
 
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-import org.unikode.toStringUtf8
-import org.unikode.Utf8Decoder
+import org.unikode.toStringUtf16Le
+import org.unikode.toUtf16LeByteArray
 
-class Utf8DecoderTests {
+class Utf16LeTests {
+
+    @Test
+    fun round_trip() =
+        assertEquals(completeString, completeString.toUtf16LeByteArray().toStringUtf16Le())
 }
