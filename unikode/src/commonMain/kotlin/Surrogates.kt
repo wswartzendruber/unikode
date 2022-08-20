@@ -16,22 +16,18 @@
 
 package org.unikode
 
-private val surrogateRange = 0xD800..0xDFFF
-private val highSurrogateRange = 0xD800..0xDBFF
-private val lowSurrogateRange = 0xDC00..0xDFFF
-
 public fun scalarValue(highSurrogate: Char, lowSurrogate: Char): Int =
     scalarValue(highSurrogate.code, lowSurrogate.code)
 
 public fun scalarValue(highSurrogate: Int, lowSurrogate: Int): Int =
-    (((highSurrogate - 0xD800) shl 10) or (lowSurrogate - 0xDC00)) + 0x10000
+    (((highSurrogate and 0x7FF) shl 10) or (lowSurrogate and 0x3FF)) or 0x10000
 
-public fun Int.isSurrogate(): Boolean = this in surrogateRange
+public fun Int.isSurrogate(): Boolean = this and 0xF800 == 0xD800
 
-public fun Int.isHighSurrogate(): Boolean = this in highSurrogateRange
+public fun Int.isHighSurrogate(): Boolean = this and 0xFC00 == 0xD800
 
-public fun Int.isLowSurrogate(): Boolean = this in lowSurrogateRange
+public fun Int.isLowSurrogate(): Boolean = this and 0xFC00 == 0xDC00
 
-public fun Int.highSurrogate(): Char = (((this - 0x10000) ushr 10) + 0xD800).toChar()
+public fun Int.highSurrogate(): Char = (((this and 0xFFFF) ushr 10) or 0xD800).toChar()
 
-public fun Int.lowSurrogate(): Char = (((this - 0x10000) and 0x3FF) + 0xDC00).toChar()
+public fun Int.lowSurrogate(): Char = (((this and 0xFFFF) and 0x3FF) or 0xDC00).toChar()
