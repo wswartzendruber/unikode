@@ -10,10 +10,17 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
-rootProject.name = "unikode"
+package org.unikode.bored.test
 
-include(
-    "unikode",
-    "unikode-bad",
-    "unikode-bored",
-)
+import kotlin.test.assertEquals
+import kotlin.test.Test
+
+import org.unikode.bored.toStringHtf7
+import org.unikode.bored.toHtf7ByteArray
+
+class Htf7Tests {
+
+    @Test
+    fun round_trip() =
+        assertEquals(completeString, completeString.toHtf7ByteArray().toStringHtf7())
+}

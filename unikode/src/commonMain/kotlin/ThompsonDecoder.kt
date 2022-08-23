@@ -98,7 +98,6 @@ public class ThompsonDecoder(private val callback: (Int) -> Unit) {
         currentScalarValue = 0
         currentBytesExpected = 0
         currentByteIndex = 0
-        currentScalarValue = 0
         minimumScalarValue = 0
     }
 }
