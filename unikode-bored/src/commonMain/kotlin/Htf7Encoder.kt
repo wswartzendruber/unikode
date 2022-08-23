@@ -17,35 +17,50 @@
 package org.unikode.bored
 
 import org.unikode.Encoder
-import org.unikode.SurrogateValidator
+import org.unikode.SurrogateComposer
 
 public class Htf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
-    private val surrogateValidator = SurrogateValidator({ codeUnit: Char ->
-
-        val value = codeUnit.code
-
-        if (value < 0x40) {
-            callback(value.toByte())
-        } else {
-            callback((0x40 or (value ushr 12 and 0xF)).toByte())
-            callback((0x50 or (value ushr 8 and 0xF)).toByte())
-            callback((0x60 or (value ushr 4 and 0xF)).toByte())
-            callback((0x70 or (value and 0xF)).toByte())
+    private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
+        when {
+            scalarValue < 0x40 -> {
+                callback(scalarValue.toByte())
+            }
+            scalarValue < 0x100 -> {
+                callback((0x40 or (scalarValue ushr 4)).toByte())
+                callback((0x70 or (scalarValue and 0xF)).toByte())
+            }
+            scalarValue < 0x10000 -> {
+                callback((0x50 or (scalarValue ushr 12)).toByte())
+                callback((0x70 or (scalarValue ushr 8 and 0xF)).toByte())
+                callback((0x70 or (scalarValue ushr 4 and 0xF)).toByte())
+                callback((0x70 or (scalarValue and 0xF)).toByte())
+            }
+            scalarValue < 0x10FFFF -> {
+                callback((0x60 or (scalarValue ushr 20)).toByte())
+                callback((0x70 or (scalarValue ushr 16 and 0xF)).toByte())
+                callback((0x70 or (scalarValue ushr 12 and 0xF)).toByte())
+                callback((0x70 or (scalarValue ushr 8 and 0xF)).toByte())
+                callback((0x70 or (scalarValue ushr 4 and 0xF)).toByte())
+                callback((0x70 or (scalarValue and 0xF)).toByte())
+            }
+            else -> {
+                throw IllegalStateException("Value too large.")
+            }
         }
     })
 
     public override fun maxBytesNeeded(charCount: Int): Int = charCount * 4
 
     public override fun input(value: Char): Unit {
-        surrogateValidator.input(value)
+        surrogateComposer.input(value)
     }
 
     public override fun flush(): Unit {
-        surrogateValidator.flush()
+        surrogateComposer.flush()
     }
 
     public override fun reset(): Unit {
-        surrogateValidator.reset()
+        surrogateComposer.reset()
     }
 }

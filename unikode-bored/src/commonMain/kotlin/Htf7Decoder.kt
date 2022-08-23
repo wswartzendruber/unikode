@@ -18,61 +18,72 @@ package org.unikode.bored
 
 import org.unikode.REPLACEMENT_CHAR
 import org.unikode.Decoder
-import org.unikode.SurrogateValidator
+import org.unikode.SurrogateDecomposer
 
 public class Htf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
-    private val surrogateValidator = SurrogateValidator(callback)
+    private val surrogateDecomposer = SurrogateDecomposer(callback)
     private var continuing = false
-    private var currentChar = 0
+    private var currentScalarValue = 0
+    private var currentBytesExpected = 0
     private var currentByteIndex = 0
+    private var minimumScalarValue = 0
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
 
     public override fun input(value: Byte): Unit {
 
-        val valueInt = value.toInt() and 0xFF
+        val valueInt = value.toInt()
 
         if (!continuing) {
-            when {
-                valueInt < 0x40 -> {
-                    callback(valueInt.toChar())
-                }
-                valueInt and 0xF0 == 0x40 -> {
-                    continuing = true
-                    currentByteIndex = 1
-                    currentChar = valueInt and 0x0F
-                }
-                else -> {
-                    reset()
-                    callback(REPLACEMENT_CHAR)
+            if (valueInt and 0xC0 == 0x00) {
+                surrogateDecomposer.input(valueInt)
+            } else {
+                continuing = true
+                currentByteIndex = 1
+                when {
+                    valueInt and 0xF0 == 0x40 -> {
+                        currentScalarValue = valueInt and 0x0F
+                        currentBytesExpected = 2
+                        minimumScalarValue = 0x39
+                    }
+                    valueInt and 0xF0 == 0x50 -> {
+                        currentScalarValue = valueInt and 0x0F
+                        currentBytesExpected = 4
+                        minimumScalarValue = 0xFF
+                    }
+                    valueInt and 0xF0 == 0x60 -> {
+                        currentScalarValue = valueInt and 0x0F
+                        currentBytesExpected = 6
+                        minimumScalarValue = 0xFFFF
+                    }
+                    else -> {
+                        reset()
+                        callback(REPLACEMENT_CHAR)
+                    }
                 }
             }
         } else {
-            val prefix = valueInt and 0xF0 or currentByteIndex++
-            when (prefix) {
-                0x51, 0x62, 0x73 -> {
-                    currentChar = (currentChar shl 4) or (valueInt and 0x0F)
+            if (valueInt and 0xF0 == 0x70) {
+                currentScalarValue = (currentScalarValue shl 4) or (valueInt and 0x0F)
+                if (++currentByteIndex == currentBytesExpected) {
+                    if (currentScalarValue > minimumScalarValue) {
+                        continuing = false
+                        surrogateDecomposer.input(currentScalarValue)
+                    } else {
+                        reset()
+                        callback(REPLACEMENT_CHAR)
+                    }
                 }
-                else -> {
-                    reset()
-                    callback(REPLACEMENT_CHAR)
-                }
-            }
-            if (currentByteIndex == 4) {
-                if (currentChar > 0x3F) {
-                    continuing = false
-                    callback(currentChar.toChar())
-                } else {
-                    reset()
-                    callback(REPLACEMENT_CHAR)
-                }
+            } else {
+                reset()
+                callback(REPLACEMENT_CHAR)
+                input(value)
             }
         }
     }
 
     public override fun flush(): Unit {
-        surrogateValidator.flush()
         if (continuing) {
             callback(REPLACEMENT_CHAR)
             continuing = false
@@ -80,9 +91,10 @@ public class Htf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
     }
 
     public override fun reset(): Unit {
-        surrogateValidator.reset()
         continuing = false
+        currentScalarValue = 0
+        currentBytesExpected = 0
         currentByteIndex = 0
-        currentChar = 0
+        minimumScalarValue = 0
     }
 }
