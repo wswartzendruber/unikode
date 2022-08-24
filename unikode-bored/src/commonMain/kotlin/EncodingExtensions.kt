@@ -18,14 +18,14 @@ package org.unikode.bored
 
 import org.unikode.Encoder
 
-public fun CharSequence.toHtf7ByteArray(): ByteArray = this.asIterable().toHtf7ByteArray()
+public fun CharSequence.toStf7ByteArray(): ByteArray = this.asIterable().toStf7ByteArray()
 
-public fun CharArray.toHtf7ByteArray(): ByteArray = this.asIterable().toHtf7ByteArray()
+public fun CharArray.toStf7ByteArray(): ByteArray = this.asIterable().toStf7ByteArray()
 
-public fun Iterable<Char>.toHtf7ByteArray(): ByteArray {
+public fun Iterable<Char>.toStf7ByteArray(): ByteArray {
 
     val bytes = mutableListOf<Byte>()
-    val encoder = Htf7Encoder({ byte -> bytes.add(byte) })
+    val encoder = Stf7Encoder({ byte -> bytes.add(byte) })
 
     for (char in this)
         encoder.input(char)

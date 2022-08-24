@@ -16,12 +16,12 @@
 
 package org.unikode.bored
 
-public fun ByteArray.toStringHtf7(): String = this.asIterable().toStringHtf7()
+public fun ByteArray.toStringStf7(): String = this.asIterable().toStringStf7()
 
-public fun Iterable<Byte>.toStringHtf7(): String {
+public fun Iterable<Byte>.toStringStf7(): String {
 
     val builder = StringBuilder()
-    val decoder = Htf7Decoder({ value: Char -> builder.append(value) })
+    val decoder = Stf7Decoder({ value: Char -> builder.append(value) })
 
     for (byte in this)
         decoder.input(byte)
