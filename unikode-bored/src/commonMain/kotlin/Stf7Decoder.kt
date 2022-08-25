@@ -25,6 +25,7 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     private val surrogateDecomposer = SurrogateDecomposer(callback)
     private var continuing = false
+    private var bytesUsed = 0
     private var currentScalarValue = 0
 
     public override fun maxCharsNeeded(byteCount: Int): Int = byteCount
@@ -37,17 +38,19 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
             valueInt < 0x80 && encodedMapping[valueInt] == -1 -> {
                 if (continuing) {
                     continuing = false
-                    surrogateDecomposer.input(sanitizeIndirectScalarValue(currentScalarValue))
+                    surrogateDecomposer.input(sanitizeIndirectScalarValue())
                 }
                 surrogateDecomposer.input(valueInt)
             }
             valueInt in encodedRangeInitial -> {
                 if (continuing)
-                    surrogateDecomposer.input(sanitizeIndirectScalarValue(currentScalarValue))
+                    surrogateDecomposer.input(sanitizeIndirectScalarValue())
                 continuing = true
+                bytesUsed = 1
                 currentScalarValue = encodedMapping[valueInt]
             }
             valueInt in encodedRangeContinuing -> {
+                bytesUsed++
                 currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
             }
             else -> {
@@ -65,8 +68,46 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     public override fun reset(): Unit {
         continuing = false
+        bytesUsed = 0
         currentScalarValue = 0
     }
+
+    private fun sanitizeIndirectScalarValue() =
+        when (bytesUsed) {
+            2 -> {
+                if (currentScalarValue > 127 || encodedMapping[currentScalarValue] != -1)
+                    currentScalarValue
+                else
+                    REPLACEMENT_CODE
+            }
+            3 -> {
+                if (currentScalarValue > 0xFF)
+                    currentScalarValue
+                else
+                    REPLACEMENT_CODE
+            }
+            4 -> {
+                if (currentScalarValue > 0xFFF)
+                    currentScalarValue
+                else
+                    REPLACEMENT_CODE
+            }
+            5 -> {
+                if (currentScalarValue > 0xFFFF)
+                    currentScalarValue
+                else
+                    REPLACEMENT_CODE
+            }
+            6 -> {
+                if (currentScalarValue > 0xFFFFF && currentScalarValue < 0x110000)
+                    currentScalarValue
+                else
+                    REPLACEMENT_CODE
+            }
+            else -> {
+                REPLACEMENT_CODE
+            }
+        }
 
     private companion object {
 
@@ -80,12 +121,5 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
             -1, -1, -1, -1, 6, 7, 8, 9, 10, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 13, 14, 15, -1,
         )
-
-        private fun sanitizeIndirectScalarValue(scalarValue: Int) =
-            if (scalarValue > 127 || encodedMapping[scalarValue] != -1)
-                scalarValue
-            else
-                REPLACEMENT_CODE
-
     }
 }
