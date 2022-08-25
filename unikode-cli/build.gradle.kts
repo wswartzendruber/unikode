@@ -10,11 +10,18 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
-rootProject.name = "unikode"
+plugins {
+    kotlin("jvm")
+    application
+}
 
-include(
-    "unikode",
-    "unikode-bad",
-    "unikode-bored",
-    "unikode-cli",
-)
+dependencies {
+    implementation(project(":unikode"))
+    implementation(project(":unikode-bad"))
+    implementation(project(":unikode-bored"))
+    implementation(platform(kotlin("bom")))
+}
+
+application {
+    mainClass.set("org.unikode.cli.ApplicationKt")
+}
