@@ -33,25 +33,21 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
         val valueInt = value.toInt() and 0xFF
 
-        when (valueInt) {
-            in directRange1,
-            in directRange2,
-            in directRange3,
-            in directRange4,
-            in directRange5 -> {
+        when {
+            valueInt < 0x80 && encodedMapping[valueInt] == -1 -> {
                 if (continuing) {
                     continuing = false
                     surrogateDecomposer.input(sanitizeIndirectScalarValue(currentScalarValue))
                 }
                 surrogateDecomposer.input(valueInt)
             }
-            in encodedRangeInitial -> {
+            valueInt in encodedRangeInitial -> {
                 if (continuing)
                     surrogateDecomposer.input(sanitizeIndirectScalarValue(currentScalarValue))
                 continuing = true
                 currentScalarValue = encodedMapping[valueInt]
             }
-            in encodedRangeContinuing -> {
+            valueInt in encodedRangeContinuing -> {
                 currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
             }
             else -> {
@@ -74,11 +70,6 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     private companion object {
 
-        private val directRange1 = 0x00..0x20
-        private val directRange2 = 0x30..0x39
-        private val directRange3 = 0x41..0x5A
-        private val directRange4 = 0x61..0x7A
-        private val directRange5 = 0x7F..0x7F
         private val encodedRangeInitial = 0x21..0x3A
         private val encodedRangeContinuing = 0x3B..0x7E
         private val encodedMapping = intArrayOf(

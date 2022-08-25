@@ -22,37 +22,33 @@ import org.unikode.SurrogateComposer
 public class Stf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
     private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
-        when (scalarValue) {
-            in directRange1,
-            in directRange2,
-            in directRange3,
-            in directRange4,
-            in directRange5 -> {
+        when {
+            scalarValue < 0x80 && directEncoded[scalarValue] -> {
                 callback(scalarValue.toByte())
             }
-            in twoByteRange -> {
+            scalarValue < 0x100 -> {
                 callback(packedInitial[scalarValue ushr 4])
                 callback(packedContinuing[scalarValue and 0xF])
             }
-            in threeByteRange -> {
+            scalarValue < 0x1000 -> {
                 callback(packedInitial[scalarValue ushr 8])
                 callback(packedContinuing[scalarValue ushr 4 and 0xF])
                 callback(packedContinuing[scalarValue and 0xF])
             }
-            in fourByteRange -> {
+            scalarValue < 0x10000 -> {
                 callback(packedInitial[scalarValue ushr 12])
                 callback(packedContinuing[scalarValue ushr 8 and 0xF])
                 callback(packedContinuing[scalarValue ushr 4 and 0xF])
                 callback(packedContinuing[scalarValue and 0xF])
             }
-            in fiveByteRange -> {
+            scalarValue < 0x100000 -> {
                 callback(packedInitial[scalarValue ushr 16])
                 callback(packedContinuing[scalarValue ushr 12 and 0xF])
                 callback(packedContinuing[scalarValue ushr 8 and 0xF])
                 callback(packedContinuing[scalarValue ushr 4 and 0xF])
                 callback(packedContinuing[scalarValue and 0xF])
             }
-            in sixByteRange -> {
+            scalarValue < 0x110000 -> {
                 callback(packedInitial[scalarValue ushr 20])
                 callback(packedContinuing[scalarValue ushr 16 and 0xF])
                 callback(packedContinuing[scalarValue ushr 12 and 0xF])
@@ -79,16 +75,24 @@ public class Stf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
     private companion object {
 
-        private val directRange1 = 0x00..0x20
-        private val directRange2 = 0x30..0x39
-        private val directRange3 = 0x41..0x5A
-        private val directRange4 = 0x61..0x7A
-        private val directRange5 = 0x7F..0x7F
-        private val twoByteRange = 0x00..0xFF
-        private val threeByteRange = 0x100..0xFFF
-        private val fourByteRange = 0x1000..0xFFFF
-        private val fiveByteRange = 0x10000..0xFFFFF
-        private val sixByteRange = 0x100000..0x10FFFF
+        private val directEncoded = booleanArrayOf(
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            true, true, true, true, true, true, true, true,
+            true, true, false, false, false, false, false, false,
+            false, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, false, false, false, false, false,
+            false, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, false, false, false, false, true,
+        )
         private val packedInitial = byteArrayOf(
             0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
             0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x3A,
