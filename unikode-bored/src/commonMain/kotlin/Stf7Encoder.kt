@@ -23,7 +23,11 @@ public class Stf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
 
     private val surrogateComposer = SurrogateComposer({ scalarValue: Int ->
         when (scalarValue) {
-            in directRange1, in directRange2, in directRange3, in directRange4 -> {
+            in directRange1,
+            in directRange2,
+            in directRange3,
+            in directRange4,
+            in directRange5 -> {
                 callback(scalarValue.toByte())
             }
             in twoByteRange -> {
@@ -79,6 +83,7 @@ public class Stf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
         private val directRange2 = 0x30..0x39
         private val directRange3 = 0x41..0x5A
         private val directRange4 = 0x61..0x7A
+        private val directRange5 = 0x7F..0x7F
         private val twoByteRange = 0x00..0xFF
         private val threeByteRange = 0x100..0xFFF
         private val fourByteRange = 0x1000..0xFFFF

@@ -17,6 +17,7 @@
 package org.unikode.bored
 
 import org.unikode.REPLACEMENT_CHAR
+import org.unikode.REPLACEMENT_CODE
 import org.unikode.Decoder
 import org.unikode.SurrogateDecomposer
 
@@ -33,16 +34,20 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
         val valueInt = value.toInt() and 0xFF
 
         when (valueInt) {
-            in directRange1, in directRange2, in directRange3, in directRange4 -> {
+            in directRange1,
+            in directRange2,
+            in directRange3,
+            in directRange4,
+            in directRange5 -> {
                 if (continuing) {
                     continuing = false
-                    surrogateDecomposer.input(currentScalarValue)
+                    surrogateDecomposer.input(sanitizeIndirectScalarValue(currentScalarValue))
                 }
                 surrogateDecomposer.input(valueInt)
             }
             in encodedRangeInitial -> {
                 if (continuing)
-                    surrogateDecomposer.input(currentScalarValue)
+                    surrogateDecomposer.input(sanitizeIndirectScalarValue(currentScalarValue))
                 continuing = true
                 currentScalarValue = encodedMapping[valueInt]
             }
@@ -73,6 +78,7 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
         private val directRange2 = 0x30..0x39
         private val directRange3 = 0x41..0x5A
         private val directRange4 = 0x61..0x7A
+        private val directRange5 = 0x7F..0x7F
         private val encodedRangeInitial = 0x21..0x3A
         private val encodedRangeContinuing = 0x3B..0x7E
         private val encodedMapping = intArrayOf(
@@ -83,5 +89,12 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
             -1, -1, -1, -1, 6, 7, 8, 9, 10, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 13, 14, 15, -1,
         )
+
+        private fun sanitizeIndirectScalarValue(scalarValue: Int) =
+            if (scalarValue > 127 || encodedMapping[scalarValue] != -1)
+                scalarValue
+            else
+                REPLACEMENT_CODE
+
     }
 }
