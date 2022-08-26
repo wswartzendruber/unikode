@@ -18,7 +18,7 @@ plugins {
 dependencies {
     implementation(project(":unikode"))
     implementation(project(":unikode-bad"))
-    implementation(project(":unikode-bored"))
+    implementation(project(":unikode-stf7"))
     implementation(platform(kotlin("bom")))
 }
 

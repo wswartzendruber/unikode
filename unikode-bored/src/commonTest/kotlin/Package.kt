@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
-package org.unikode.bored.test
+package org.unikode.stf7.test
 
 import org.unikode.highSurrogate
 import org.unikode.lowSurrogate

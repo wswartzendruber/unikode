@@ -6,8 +6,8 @@ import kotlin.system.exitProcess
 
 import org.unikode.Utf8Decoder
 import org.unikode.Utf8Encoder
-import org.unikode.bored.Stf7Decoder
-import org.unikode.bored.Stf7Encoder
+import org.unikode.stf7.Stf7Decoder
+import org.unikode.stf7.Stf7Encoder
 
 fun main(args: Array<String>) {
 

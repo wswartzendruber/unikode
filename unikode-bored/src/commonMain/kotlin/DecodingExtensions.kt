@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.unikode.bored
+package org.unikode.stf7
 
 public fun ByteArray.toStringStf7(): String = this.asIterable().toStringStf7()
 

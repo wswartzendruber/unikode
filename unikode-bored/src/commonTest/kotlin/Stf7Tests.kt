@@ -10,17 +10,17 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
-package org.unikode.bored.test
+package org.unikode.stf7.test
 
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.Test
 
 import org.unikode.REPLACEMENT_CHAR
-import org.unikode.bored.toStf7ByteArray
-import org.unikode.bored.toStringStf7
-import org.unikode.bored.Stf7Encoder
-import org.unikode.bored.Stf7Decoder
+import org.unikode.stf7.toStf7ByteArray
+import org.unikode.stf7.toStringStf7
+import org.unikode.stf7.Stf7Encoder
+import org.unikode.stf7.Stf7Decoder
 
 class Stf7Tests {
 

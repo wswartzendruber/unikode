@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.unikode.bored
+package org.unikode.stf7
 
 import org.unikode.REPLACEMENT_CHAR
 import org.unikode.REPLACEMENT_CODE
