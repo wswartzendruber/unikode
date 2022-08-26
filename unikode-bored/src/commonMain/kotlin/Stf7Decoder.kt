@@ -50,8 +50,12 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
                 currentScalarValue = encodedMapping[valueInt]
             }
             valueInt in encodedRangeContinuing -> {
-                bytesUsed++
-                currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
+                if (continuing) {
+                    bytesUsed++
+                    currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
+                } else {
+                    callback(REPLACEMENT_CHAR)
+                }
             }
             else -> {
                 reset()
