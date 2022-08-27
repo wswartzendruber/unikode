@@ -28,33 +28,33 @@ public class Stf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
             }
             scalarValue < 0x100 -> {
                 callback(packedInitial[scalarValue ushr 4])
-                callback(packedContinuing[scalarValue and 0xF])
+                callback(packedClosing[scalarValue and 0xF])
             }
             scalarValue < 0x1000 -> {
                 callback(packedInitial[scalarValue ushr 8])
-                callback(packedContinuing[scalarValue ushr 4 and 0xF])
-                callback(packedContinuing[scalarValue and 0xF])
+                callback(packedInitial[scalarValue ushr 4 and 0xF])
+                callback(packedClosing[scalarValue and 0xF])
             }
             scalarValue < 0x10000 -> {
                 callback(packedInitial[scalarValue ushr 12])
-                callback(packedContinuing[scalarValue ushr 8 and 0xF])
-                callback(packedContinuing[scalarValue ushr 4 and 0xF])
-                callback(packedContinuing[scalarValue and 0xF])
+                callback(packedInitial[scalarValue ushr 8 and 0xF])
+                callback(packedInitial[scalarValue ushr 4 and 0xF])
+                callback(packedClosing[scalarValue and 0xF])
             }
             scalarValue < 0x100000 -> {
                 callback(packedInitial[scalarValue ushr 16])
-                callback(packedContinuing[scalarValue ushr 12 and 0xF])
-                callback(packedContinuing[scalarValue ushr 8 and 0xF])
-                callback(packedContinuing[scalarValue ushr 4 and 0xF])
-                callback(packedContinuing[scalarValue and 0xF])
+                callback(packedInitial[scalarValue ushr 12 and 0xF])
+                callback(packedInitial[scalarValue ushr 8 and 0xF])
+                callback(packedInitial[scalarValue ushr 4 and 0xF])
+                callback(packedClosing[scalarValue and 0xF])
             }
             scalarValue < 0x110000 -> {
                 callback(packedInitial[scalarValue ushr 20])
-                callback(packedContinuing[scalarValue ushr 16 and 0xF])
-                callback(packedContinuing[scalarValue ushr 12 and 0xF])
-                callback(packedContinuing[scalarValue ushr 8 and 0xF])
-                callback(packedContinuing[scalarValue ushr 4 and 0xF])
-                callback(packedContinuing[scalarValue and 0xF])
+                callback(packedInitial[scalarValue ushr 16 and 0xF])
+                callback(packedInitial[scalarValue ushr 12 and 0xF])
+                callback(packedInitial[scalarValue ushr 8 and 0xF])
+                callback(packedInitial[scalarValue ushr 4 and 0xF])
+                callback(packedClosing[scalarValue and 0xF])
             }
         }
     })
@@ -97,7 +97,7 @@ public class Stf7Encoder(callback: (Byte) -> Unit) : Encoder(callback) {
             0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
             0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x3A,
         )
-        private val packedContinuing = byteArrayOf(
+        private val packedClosing = byteArrayOf(
             0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40, 0x5B, 0x5C,
             0x5D, 0x5E, 0x5F, 0x60, 0x7B, 0x7C, 0x7D, 0x7E,
         )
