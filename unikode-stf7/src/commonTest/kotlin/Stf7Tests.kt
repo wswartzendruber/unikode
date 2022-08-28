@@ -27,4 +27,8 @@ class Stf7Tests {
     @Test
     fun round_trip() =
         assertEquals(completeString, completeString.toStf7ByteArray().toStringStf7())
+
+    @Test
+    fun reject_initial_closing_chunk() =
+        assertEquals(byteArrayOf(0x20, 0x5D, 0x20).toStringStf7(), " � ")
 }
