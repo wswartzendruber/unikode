@@ -35,8 +35,11 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
         when {
             valueInt < 0x80 && encodedMapping[valueInt] == -1 -> {
-                bytesUsed = 0
-                currentScalarValue = 0
+                if (bytesUsed > 0) {
+                    bytesUsed = 0
+                    currentScalarValue = 0
+                    callback(REPLACEMENT_CHAR)
+                }
                 callback(valueInt.toChar())
             }
             valueInt in encodedRangeInitial -> {

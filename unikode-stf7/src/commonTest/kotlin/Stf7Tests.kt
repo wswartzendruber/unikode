@@ -29,6 +29,22 @@ class Stf7Tests {
         assertEquals(completeString, completeString.toStf7ByteArray().toStringStf7())
 
     @Test
-    fun reject_initial_closing_chunk() =
+    fun reject_d_ic_d() =
+        assertEquals(byteArrayOf(0x20, 0x29, 0x20).toStringStf7(), " � ")
+
+    @Test
+    fun reject_d_if_d() =
         assertEquals(byteArrayOf(0x20, 0x5D, 0x20).toStringStf7(), " � ")
+
+    @Test
+    fun reject_d_ic_ic_d() =
+        assertEquals(byteArrayOf(0x20, 0x29, 0x29, 0x20).toStringStf7(), " � ")
+
+    @Test
+    fun reject_d_if_ic_d() =
+        assertEquals(byteArrayOf(0x20, 0x5D, 0x29, 0x20).toStringStf7(), " �� ")
+
+    @Test
+    fun reject_d_if_if_d() =
+        assertEquals(byteArrayOf(0x20, 0x5D, 0x5D, 0x20).toStringStf7(), " �� ")
 }
