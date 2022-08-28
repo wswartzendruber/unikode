@@ -42,7 +42,7 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
                 }
                 callback(valueInt.toChar())
             }
-            valueInt in encodedRangeInitial -> {
+            valueInt in encodedRangeContinuing -> {
                 bytesUsed++
                 currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
             }
@@ -113,7 +113,7 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     private companion object {
 
-        private val encodedRangeInitial = 0x21..0x3A
+        private val encodedRangeContinuing = 0x21..0x3A
         private val encodedRangeClosing = 0x3B..0x7E
         private val encodedMapping = intArrayOf(
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
