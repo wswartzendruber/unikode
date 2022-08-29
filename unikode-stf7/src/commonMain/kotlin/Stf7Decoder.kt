@@ -33,69 +33,77 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
         val valueInt = value.toInt() and 0xFF
 
-        when {
-            valueInt < 0x80 && encodedMapping[valueInt] == -1 -> {
-                if (bytesUsed > 0) {
+        if (valueInt < 0x80) {
+            when {
+                isDirectByte[valueInt] -> {
+                    if (bytesUsed > 0) {
+                        bytesUsed = 0
+                        currentScalarValue = 0
+                        callback(REPLACEMENT_CHAR)
+                    }
+                    callback(valueInt.toChar())
+                }
+                isContinuingByte[valueInt] -> {
+                    bytesUsed++
+                    currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
+                }
+                isClosingByte[valueInt] -> {
+                    bytesUsed++
+                    currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
+                    surrogateDecomposer.input(
+                        when (bytesUsed) {
+                            2 -> {
+                                if (
+                                    currentScalarValue > 127 ||
+                                    encodedMapping[currentScalarValue] != -1
+                                )
+                                    currentScalarValue
+                                else
+                                    REPLACEMENT_CODE
+                            }
+                            3 -> {
+                                if (currentScalarValue > 0xFF)
+                                    currentScalarValue
+                                else
+                                    REPLACEMENT_CODE
+                            }
+                            4 -> {
+                                if (currentScalarValue > 0xFFF)
+                                    currentScalarValue
+                                else
+                                    REPLACEMENT_CODE
+                            }
+                            5 -> {
+                                if (currentScalarValue > 0xFFFF)
+                                    currentScalarValue
+                                else
+                                    REPLACEMENT_CODE
+                            }
+                            6 -> {
+                                if (
+                                    currentScalarValue > 0xFFFFF &&
+                                    currentScalarValue < 0x110000
+                                )
+                                    currentScalarValue
+                                else
+                                    REPLACEMENT_CODE
+                            }
+                            else -> {
+                                REPLACEMENT_CODE
+                            }
+                        }
+                    )
                     bytesUsed = 0
                     currentScalarValue = 0
+                }
+                else -> {
+                    reset()
                     callback(REPLACEMENT_CHAR)
                 }
-                callback(valueInt.toChar())
             }
-            valueInt in encodedRangeContinuing -> {
-                bytesUsed++
-                currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
-            }
-            valueInt in encodedRangeClosing -> {
-                bytesUsed++
-                currentScalarValue = (currentScalarValue shl 4) or encodedMapping[valueInt]
-                surrogateDecomposer.input(
-                    when (bytesUsed) {
-                        2 -> {
-                            if (
-                                currentScalarValue > 127 ||
-                                encodedMapping[currentScalarValue] != -1
-                            )
-                                currentScalarValue
-                            else
-                                REPLACEMENT_CODE
-                        }
-                        3 -> {
-                            if (currentScalarValue > 0xFF)
-                                currentScalarValue
-                            else
-                                REPLACEMENT_CODE
-                        }
-                        4 -> {
-                            if (currentScalarValue > 0xFFF)
-                                currentScalarValue
-                            else
-                                REPLACEMENT_CODE
-                        }
-                        5 -> {
-                            if (currentScalarValue > 0xFFFF)
-                                currentScalarValue
-                            else
-                                REPLACEMENT_CODE
-                        }
-                        6 -> {
-                            if (currentScalarValue > 0xFFFFF && currentScalarValue < 0x110000)
-                                currentScalarValue
-                            else
-                                REPLACEMENT_CODE
-                        }
-                        else -> {
-                            REPLACEMENT_CODE
-                        }
-                    }
-                )
-                bytesUsed = 0
-                currentScalarValue = 0
-            }
-            else -> {
-                reset()
-                callback(REPLACEMENT_CHAR)
-            }
+        } else {
+            reset()
+            callback(REPLACEMENT_CHAR)
         }
     }
 
@@ -113,8 +121,60 @@ public class Stf7Decoder(callback: (Char) -> Unit) : Decoder(callback) {
 
     private companion object {
 
-        private val encodedRangeContinuing = 0x21..0x3A
-        private val encodedRangeClosing = 0x3B..0x7E
+        private val isDirectByte = booleanArrayOf(
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            true, true, true, true, true, true, true, true,
+            true, true, false, false, false, false, false, false,
+            false, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, false, false, false, false, false,
+            false, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            true, true, true, false, false, false, false, true,
+        )
+        private val isContinuingByte = booleanArrayOf(
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, true, true, true, true, true, true, true,
+            true, true, true, true, true, true, true, true,
+            false, false, false, false, false, false, false, false,
+            false, false, true, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+        )
+        private val isClosingByte = booleanArrayOf(
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, true, true, true, true, true,
+            true, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, true, true, true, true, true,
+            true, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false,
+            false, false, false, true, true, true, true, false,
+        )
         private val encodedMapping = intArrayOf(
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
