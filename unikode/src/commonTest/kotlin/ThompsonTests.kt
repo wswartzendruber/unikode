@@ -23,7 +23,7 @@ import org.unikode.ThompsonDecoder
 class ThompsonTests {
 
     @Test
-    fun round_trip() {
+    fun round_trip_valid() {
 
         var index = 0
         val decoder = ThompsonDecoder({ value: Int ->
@@ -35,6 +35,20 @@ class ThompsonTests {
 
         for (value in scalarValues)
             encoder.input(value)
+    }
+
+    @Test
+    fun round_trip_invalid() {
+
+        val decoder = ThompsonDecoder({ value: Int ->
+            assertEquals(0x0, value)
+        })
+        val encoder = ThompsonEncoder({ byte: Byte ->
+            decoder.input(byte)
+        })
+
+        encoder.input(Int.MIN_VALUE)
+        encoder.input(0x0)
     }
 
     @Test
@@ -431,22 +445,17 @@ class ThompsonTests {
         val scalarValues = buildList {
             for (value in 0x0..0x7F)
                 add(value)
-            add(0x7F)
             for (value in 0x80..0x7FF step 10)
                 add(value)
-            add(0x7FF)
             for (value in 0x800..0xFFFF step 100)
                 add(value)
-            add(0xFFFF)
             for (value in 0x10000..0x1FFFFF step 1_000)
                 add(value)
-            add(0x1FFFFF)
             for (value in 0x200000..0x3FFFFFF step 10_000)
                 add(value)
-            add(0x3FFFFFF)
             for (value in 0x4000000..0x7FFFFFFF step 100_000)
                 add(value)
-            add(0x7FFFFFFF)
+            add(Int.MAX_VALUE)
         }
 
         fun twoByteValue(destination: ByteArray, value: Int) {
