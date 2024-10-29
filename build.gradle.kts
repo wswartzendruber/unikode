@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 William Swartzendruber
+ * Copyright 2024 William Swartzendruber
  *
  * To the extent possible under law, the person who associated CC0 with this file has waived all
  * copyright and related or neighboring rights to this file.
@@ -11,10 +11,10 @@
  */
 
 plugins {
-    kotlin("multiplatform").version("1.8.0").apply(false)
-    kotlin("jvm").version("1.8.0").apply(false)
-    kotlin("js").version("1.8.0").apply(false)
-    id("org.jetbrains.dokka").version("1.7.20").apply(false)
+    kotlin("multiplatform").version("2.0.21").apply(false)
+    kotlin("jvm").version("2.0.21").apply(false)
+    kotlin("js").version("2.0.21").apply(false)
+    id("org.jetbrains.dokka").version("1.9.20").apply(false)
 }
 
 allprojects {
