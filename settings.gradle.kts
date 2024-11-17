@@ -15,6 +15,7 @@ rootProject.name = "unikode"
 include(
     "unikode",
     "unikode-bad",
+    "unikode-cf8",
     "unikode-cli",
     "unikode-stf7",
 )
