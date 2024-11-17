@@ -17,6 +17,8 @@ import org.unikode.Utf32BeEncoder
 import org.unikode.Utf32BeDecoder
 import org.unikode.bad.Cesu8Encoder
 import org.unikode.bad.Cesu8Decoder
+import org.unikode.cf8.Cf8Encoder
+import org.unikode.cf8.Cf8Decoder
 import org.unikode.stf7.Stf7Encoder
 import org.unikode.stf7.Stf7Decoder
 
@@ -43,6 +45,7 @@ fun main(args: Array<String>) {
             "utf32le-bom" -> Pair(Utf32LeEncoder(encoderCallback), true)
             "utf32be-bom" -> Pair(Utf32BeEncoder(encoderCallback), true)
             "cesu8" -> Pair(Cesu8Encoder(encoderCallback), false)
+            "cf8" -> Pair(Cf8Encoder(encoderCallback), false)
             "stf7" -> Pair(Stf7Encoder(encoderCallback), false)
             else -> throw IllegalArgumentException("Invalid output encoding specified.")
         }
@@ -63,6 +66,7 @@ fun main(args: Array<String>) {
             "utf32le" -> Utf32LeDecoder(decoderCallback)
             "utf32be" -> Utf32BeDecoder(decoderCallback)
             "cesu8" -> Cesu8Decoder(decoderCallback)
+            "cf8" -> Cf8Decoder(decoderCallback)
             "stf7" -> Stf7Decoder(decoderCallback)
             else -> throw IllegalArgumentException("Invalid input encoding specififed.")
         }
