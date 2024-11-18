@@ -72,8 +72,13 @@ public class Cf8Decoder(callback: (Char) -> Unit) : Decoder(callback) {
                             {
                                 2 -> {
                                     currentScalarValue = currentScalarValue or valueInt - 0xA0
-                                    surrogateValidator.input(currentScalarValue)
-                                    end()
+                                    if (currentScalarValue >= minimumScalarValue) {
+                                        surrogateValidator.input(currentScalarValue)
+                                        end()
+                                    } else {
+                                        callback(REPLACEMENT_CHAR)
+                                        reset()
+                                    }
                                 }
                                 else -> {
                                     throw IllegalStateException()
@@ -88,8 +93,13 @@ public class Cf8Decoder(callback: (Char) -> Unit) : Decoder(callback) {
                                 }
                                 3 -> {
                                     currentScalarValue = currentScalarValue or valueInt - 0xA0
-                                    surrogateValidator.input(currentScalarValue)
-                                    end()
+                                    if (currentScalarValue >= minimumScalarValue) {
+                                        surrogateValidator.input(currentScalarValue)
+                                        end()
+                                    } else {
+                                        callback(REPLACEMENT_CHAR)
+                                        reset()
+                                    }
                                 }
                                 else -> {
                                     throw IllegalStateException()
